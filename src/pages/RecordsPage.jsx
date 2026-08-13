@@ -18,10 +18,15 @@ import {
 const WORKOUT_ORDER = [
   'aphrodite',
   'apollon',
+  'artemis',
   'dione',
+  'hades',
   'iris',
   'metis',
+  'poseidon',
+  'prometheus',
   'venus',
+  'zeus',
 ]
 
 const MAX_ORDER = [
@@ -29,16 +34,22 @@ const MAX_ORDER = [
   'squatMax',
   'situpMax',
   'pushupMax',
+  'pullupMax',
   'legLeverMax',
 ]
 
 const WORKOUT_IMAGES = {
   aphrodite: 'assets/workouts/aphrodite.webp',
   apollon: 'assets/workouts/apollon.webp',
+  artemis: 'assets/workouts/artemis.webp',
   dione: 'assets/workouts/dione.webp',
+  hades: 'assets/workouts/hades.webp',
   iris: 'assets/workouts/iris.webp',
   metis: 'assets/workouts/metis.webp',
+  poseidon: 'assets/workouts/poseidon.webp',
+  prometheus: 'assets/workouts/prometheus.webp',
   venus: 'assets/workouts/venus.webp',
+  zeus: 'assets/workouts/zeus.webp',
 }
 
 const MAX_IMAGES = {
@@ -46,6 +57,7 @@ const MAX_IMAGES = {
   squatMax: 'assets/exercises/squats.webp',
   situpMax: 'assets/exercises/situps.webp',
   pushupMax: 'assets/exercises/pushups.webp',
+  pullupMax: 'assets/exercises/pullups.webp',
   legLeverMax: 'assets/exercises/leg-levers.webp',
 }
 
@@ -270,11 +282,11 @@ function RecordsPage() {
         <section className="records-summary">
           <article>
             <span>WORKOUTS CON MARCA</span>
-            <strong>{workoutsWithRecords} / 6</strong>
+            <strong>{workoutsWithRecords} / 11</strong>
           </article>
           <article>
             <span>MAX CON MARCA</span>
-            <strong>{maxWithRecords} / 5</strong>
+            <strong>{maxWithRecords} / 6</strong>
           </article>
           <article>
             <span>TOTAL COMPLETADOS</span>

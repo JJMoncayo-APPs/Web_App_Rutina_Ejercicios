@@ -91,6 +91,39 @@ const buildRunStep = ({
   }
 }
 
+const buildWorkoutRestStep = ({
+  step,
+  workout,
+  roundNumber,
+  totalRounds,
+  position,
+}) => {
+  const durationSeconds = Math.max(
+    1,
+    Number(step.durationSeconds) || 0
+  )
+
+  return {
+    id: createId(
+      workout.id,
+      roundNumber || 0,
+      'rest',
+      position
+    ),
+    type: 'rest',
+    name: 'Descanso',
+    workoutId: workout.id,
+    workoutName: workout.name,
+    durationSeconds,
+    remainingSeconds: durationSeconds,
+    roundNumber: roundNumber || null,
+    totalRounds: totalRounds || null,
+    timerStarted: false,
+    timerFinished: false,
+    completed: false,
+  }
+}
+
 const buildWorkoutContentStep = ({
   step,
   workout,
@@ -110,6 +143,16 @@ const buildWorkoutContentStep = ({
 
   if (step.type === 'run') {
     return buildRunStep({
+      step,
+      workout,
+      roundNumber,
+      totalRounds,
+      position,
+    })
+  }
+
+  if (step.type === 'rest') {
+    return buildWorkoutRestStep({
       step,
       workout,
       roundNumber,
@@ -155,6 +198,10 @@ const buildWorkoutSteps = (workoutId, occurrence = 1) => {
 
   if (Array.isArray(workout.rounds)) {
     workout.rounds.forEach((round) => {
+      if (!Array.isArray(round.steps)) {
+        return
+      }
+
       round.steps.forEach((step, index) => {
         addBuiltStep({
           step,
@@ -237,12 +284,14 @@ const buildMaxStep = (maxId, occurrence = 1) => {
 }
 
 const buildRestStep = (durationSeconds, occurrence = 1) => {
+  const safeDuration = Math.max(1, Number(durationSeconds) || 0)
+
   return {
     id: createId('rest', occurrence),
     type: 'rest',
     name: 'Descanso',
-    durationSeconds,
-    remainingSeconds: durationSeconds,
+    durationSeconds: safeDuration,
+    remainingSeconds: safeDuration,
     timerStarted: false,
     timerFinished: false,
     completed: false,

@@ -194,6 +194,36 @@ export const exercises = {
       'Eleva las piernas hasta donde puedas y lleva las manos hacia las espinillas.',
     shoulderWarning: false,
   },
+  pullups: {
+    id: 'pullups',
+    name: 'Dominadas',
+    shortName: 'Dominadas',
+    category: 'upperBody',
+    measurement: 'repetitions',
+    image: 'assets/exercises/pullups.webp',
+    modifiedImage: 'assets/exercises/pullups-modified.webp',
+    instructions:
+      'Desde una posición colgada con los brazos extendidos, eleva el cuerpo hasta superar la barra con la barbilla y baja de forma controlada.',
+    modifiedInstructions:
+      'Utiliza una barra baja, mantén los pies apoyados y acerca el pecho a la barra conservando el cuerpo alineado.',
+    shoulderWarning: true,
+  },
+
+  handstandPushups: {
+    id: 'handstandPushups',
+    name: 'Flexiones de pino',
+    shortName: 'Flexiones de pino',
+    category: 'upperBody',
+    measurement: 'repetitions',
+    image: 'assets/exercises/handstand-pushups.webp',
+    modifiedImage:
+      'assets/exercises/handstand-pushups-modified.webp',
+    instructions:
+      'En posición de pino con los pies apoyados en la pared, flexiona los brazos hasta acercar la cabeza al suelo y vuelve a extenderlos.',
+    modifiedInstructions:
+      'Realiza flexiones en pica con la cadera elevada, acercando la cabeza al suelo entre las manos y extendiendo de nuevo los brazos.',
+    shoulderWarning: true,
+  },
 
   running: {
     id: 'running',
@@ -374,6 +404,203 @@ export const workouts = {
       ],
     })),
   },
+    artemis: {
+    id: 'artemis',
+    name: 'Artemis',
+    type: 'workout',
+    measurement: 'time',
+    equipment: ['pullupBar'],
+    requiresRunningSpace: false,
+    rounds: [
+      {
+        round: 1,
+        steps: [
+          ejercicio('burpees', 50),
+          ejercicio('pullups', 50),
+          ejercicio('pushups', 100),
+          ejercicio('squats', 150),
+          ejercicio('burpees', 50),
+        ],
+      },
+    ],
+  },
+
+  hades: {
+    id: 'hades',
+    name: 'Hades',
+    type: 'workout',
+    measurement: 'time',
+    equipment: ['pullupBar'],
+    requiresRunningSpace: true,
+    rounds: Array.from({ length: 3 }, (_, index) => ({
+      round: index + 1,
+      steps: [
+        ejercicio('burpees', 25),
+        ejercicio('pullups', 15),
+        ejercicio('pushups', 15),
+        ejercicio('burpees', 25),
+        carrera(80),
+      ],
+    })),
+  },
+
+  poseidon: {
+    id: 'poseidon',
+    name: 'Poseidon',
+    type: 'workout',
+    measurement: 'time',
+    equipment: ['pullupBar'],
+    requiresRunningSpace: false,
+    rounds: [
+      {
+        round: 1,
+        steps: [
+          ejercicio('pullups', 20),
+          ejercicio('pushups', 20),
+        ],
+      },
+      {
+        round: 2,
+        steps: [
+          ejercicio('pullups', 15),
+          ejercicio('pushups', 15),
+        ],
+      },
+      {
+        round: 3,
+        steps: [
+          ejercicio('pullups', 10),
+          ejercicio('pushups', 10),
+        ],
+      },
+      {
+        round: 4,
+        steps: [
+          ejercicio('pullups', 5),
+          ejercicio('pushups', 5),
+        ],
+      },
+    ],
+  },
+
+  prometheus: {
+    id: 'prometheus',
+    name: 'Prometheus',
+    type: 'workout',
+    measurement: 'time',
+    equipment: [],
+    requiresRunningSpace: false,
+    rounds: [
+      {
+        round: 1,
+        steps: [
+          ejercicio('climbers', 30),
+          ejercicio('pushups', 10),
+          ejercicio('situps', 30),
+          ejercicio('squats', 30),
+          ejercicio('jumpingJacks', 50),
+          descanso(30),
+        ],
+      },
+      {
+        round: 2,
+        steps: [
+          ejercicio('climbers', 20),
+          ejercicio('pushups', 7),
+          ejercicio('situps', 20),
+          ejercicio('squats', 20),
+          ejercicio('jumpingJacks', 50),
+          descanso(30),
+        ],
+      },
+      {
+        round: 3,
+        steps: [
+          ejercicio('climbers', 10),
+          ejercicio('pushups', 5),
+          ejercicio('situps', 10),
+          ejercicio('squats', 10),
+          ejercicio('jumpingJacks', 50),
+          descanso(30),
+        ],
+      },
+      {
+        round: 4,
+        steps: [
+          ejercicio('climbers', 20),
+          ejercicio('pushups', 7),
+          ejercicio('situps', 20),
+          ejercicio('squats', 20),
+          ejercicio('jumpingJacks', 50),
+          descanso(30),
+        ],
+      },
+      {
+        round: 5,
+        steps: [
+          ejercicio('climbers', 30),
+          ejercicio('pushups', 10),
+          ejercicio('situps', 30),
+          ejercicio('squats', 30),
+          ejercicio('jumpingJacks', 50),
+        ],
+      },
+    ],
+  },
+
+  zeus: {
+    id: 'zeus',
+    name: 'Zeus',
+    type: 'workout',
+    measurement: 'time',
+    equipment: ['pullupBar', 'wall'],
+    requiresRunningSpace: false,
+    rounds: [
+      {
+        round: 1,
+        steps: [
+          ejercicio('handstandPushups', 5),
+          ejercicio('pullups', 15),
+          ejercicio('pushups', 25),
+          ejercicio('situps', 35),
+          ejercicio('squats', 45),
+          descanso(120),
+        ],
+      },
+      {
+        round: 2,
+        steps: [
+          ejercicio('handstandPushups', 5),
+          ejercicio('pullups', 15),
+          ejercicio('pushups', 25),
+          ejercicio('situps', 35),
+          ejercicio('squats', 45),
+          descanso(120),
+        ],
+      },
+      {
+        round: 3,
+        steps: [
+          ejercicio('handstandPushups', 5),
+          ejercicio('pullups', 15),
+          ejercicio('pushups', 25),
+          ejercicio('situps', 35),
+          ejercicio('squats', 45),
+          descanso(120),
+        ],
+      },
+      {
+        round: 4,
+        steps: [
+          ejercicio('handstandPushups', 5),
+          ejercicio('pullups', 15),
+          ejercicio('pushups', 25),
+          ejercicio('situps', 35),
+          ejercicio('squats', 45),
+        ],
+      },
+    ],
+  },
 }
 
 // ======================================================
@@ -423,6 +650,14 @@ export const maxExercises = {
     type: 'max',
     exerciseId: 'squats',
     durationSeconds: 300,
+    measurement: 'repetitions',
+  },
+    pullupMax: {
+    id: 'pullupMax',
+    name: 'Pullup MAX',
+    type: 'max',
+    exerciseId: 'pullups',
+    durationSeconds: 100,
     measurement: 'repetitions',
   },
 }

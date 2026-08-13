@@ -8,6 +8,7 @@ import {
   registerWorkoutResult,
 } from '../services/workoutHistoryService'
 import {
+  playFinishBeep,
   playPreparationBeep,
   playStartBeep,
   unlockAudio,
@@ -17,10 +18,15 @@ import { getAppSettings } from '../services/appSettingsService'
 const WORKOUT_IMAGES = {
   aphrodite: 'assets/workouts/aphrodite.webp',
   apollon: 'assets/workouts/apollon.webp',
+  artemis: 'assets/workouts/artemis.webp',
   dione: 'assets/workouts/dione.webp',
+  hades: 'assets/workouts/hades.webp',
   iris: 'assets/workouts/iris.webp',
   metis: 'assets/workouts/metis.webp',
+  poseidon: 'assets/workouts/poseidon.webp',
+  prometheus: 'assets/workouts/prometheus.webp',
   venus: 'assets/workouts/venus.webp',
+  zeus: 'assets/workouts/zeus.webp',
 }
 
 const formatTime = (totalSeconds = 0) => {
@@ -57,6 +63,27 @@ const buildWorkoutSteps = (workout) => {
     : 0
 
   const addStep = (step, roundNumber, position) => {
+    if (step.type === 'rest') {
+      const durationSeconds = Math.max(
+        1,
+        Number(step.durationSeconds) || 0
+      )
+
+      flattenedSteps.push({
+        id: `${workout.id}-${position}`,
+        type: 'rest',
+        workoutId: workout.id,
+        workoutName: workout.name,
+        name: 'Descanso',
+        durationSeconds,
+        roundNumber,
+        totalRounds,
+        completed: false,
+      })
+
+      return
+    }
+
     if (step.type === 'run') {
       const running = exercises.running
 
@@ -171,6 +198,7 @@ function StandaloneWorkoutPage() {
     preparationDuration
   )
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [restRemainingSeconds, setRestRemainingSeconds] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
   const [startedAt, setStartedAt] = useState(null)
   const [selectedVersions, setSelectedVersions] = useState({})
@@ -180,6 +208,7 @@ function StandaloneWorkoutPage() {
 
   const timerRef = useRef(null)
   const preparationRef = useRef(null)
+  const restIntervalRef = useRef(null)
   const lastSoundRef = useRef(null)
 
   const currentStep = steps[currentStepIndex] || null
@@ -273,8 +302,54 @@ function StandaloneWorkoutPage() {
   ])
 
   useEffect(() => {
+    clearInterval(restIntervalRef.current)
+
+    if (screen !== 'rest' || !currentStep) {
+      return undefined
+    }
+
+    if (restRemainingSeconds <= 0) {
+      if (appSettings.soundsEnabled) {
+        playFinishBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate([180, 80, 180])
+      }
+
+      const nextIndex = currentStepIndex + 1
+
+      if (nextIndex >= steps.length) {
+        completeWorkout()
+        return undefined
+      }
+
+      setCurrentStepIndex(nextIndex)
+      startPreparation()
+      return undefined
+    }
+
+    restIntervalRef.current = window.setInterval(() => {
+      setRestRemainingSeconds((currentValue) =>
+        Math.max(0, currentValue - 1)
+      )
+    }, 1000)
+
+    return () => clearInterval(restIntervalRef.current)
+  }, [
+    screen,
+    restRemainingSeconds,
+    currentStepIndex,
+    currentStep?.id,
+    steps.length,
+    appSettings.soundsEnabled,
+    appSettings.vibrationEnabled,
+  ])
+
+  useEffect(() => {
     return () => {
       clearInterval(timerRef.current)
+      clearInterval(restIntervalRef.current)
       clearTimeout(preparationRef.current)
     }
   }, [])
@@ -317,14 +392,33 @@ function StandaloneWorkoutPage() {
     setScreen('completed')
   }
 
-  const completeCurrentExercise = () => {
-    if (currentStepIndex >= steps.length - 1) {
+  const goToNextStep = () => {
+    const nextIndex = currentStepIndex + 1
+
+    if (nextIndex >= steps.length) {
       completeWorkout()
       return
     }
 
-    setCurrentStepIndex((currentValue) => currentValue + 1)
+    const nextStep = steps[nextIndex]
+    setCurrentStepIndex(nextIndex)
+
+    if (nextStep.type === 'rest') {
+      setRestRemainingSeconds(nextStep.durationSeconds)
+      setScreen('rest')
+      return
+    }
+
     startPreparation()
+  }
+
+  const completeCurrentExercise = () => {
+    goToNextStep()
+  }
+
+  const skipRest = () => {
+    clearInterval(restIntervalRef.current)
+    goToNextStep()
   }
 
   const selectVersion = (version) => {
@@ -347,12 +441,14 @@ function StandaloneWorkoutPage() {
 
   const restartWorkout = () => {
     clearInterval(timerRef.current)
+    clearInterval(restIntervalRef.current)
     clearTimeout(preparationRef.current)
 
     setScreen('intro')
     setCurrentStepIndex(0)
     setPreparationSeconds(preparationDuration)
     setElapsedSeconds(0)
+    setRestRemainingSeconds(0)
     setTimerRunning(false)
     setStartedAt(null)
     setSelectedVersions({})
@@ -452,7 +548,7 @@ function StandaloneWorkoutPage() {
     return (
       <section className="training-countdown-card">
         <p className="training-kicker">PREPÁRATE</p>
-        <h2>{currentStep?.exerciseName}</h2>
+        <h2>{currentStep?.exerciseName || 'Siguiente ejercicio'}</h2>
 
         <strong className="training-preparation-repetitions">
           {currentStep?.type === 'run'
@@ -595,6 +691,35 @@ function StandaloneWorkoutPage() {
     )
   }
 
+  const renderRest = () => (
+    <section className="training-rest-card">
+      <p className="training-kicker">DESCANSO</p>
+
+      {currentStep?.roundNumber && (
+        <strong>
+          RONDA {currentStep.roundNumber} DE {currentStep.totalRounds}
+        </strong>
+      )}
+
+      <div className="training-rest-timer">
+        {formatTime(restRemainingSeconds)}
+      </div>
+
+      <p>
+        Recupera el ritmo respiratorio. Al terminar comenzará la
+        preparación del siguiente ejercicio.
+      </p>
+
+      <button
+        type="button"
+        className="training-secondary-button"
+        onClick={skipRest}
+      >
+        OMITIR DESCANSO
+      </button>
+    </section>
+  )
+
   const renderCompleted = () => (
     <section className="training-completed-card">
       <div className="training-completed-icon">✓</div>
@@ -676,6 +801,7 @@ function StandaloneWorkoutPage() {
         {screen === 'intro' && renderIntro()}
         {screen === 'preparation' && renderPreparation()}
         {screen === 'exercise' && renderExercise()}
+        {screen === 'rest' && renderRest()}
         {screen === 'completed' && renderCompleted()}
       </section>
 

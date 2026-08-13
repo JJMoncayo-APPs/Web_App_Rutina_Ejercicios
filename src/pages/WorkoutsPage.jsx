@@ -10,19 +10,29 @@ import { getWorkoutStatistics } from '../services/workoutHistoryService'
 const WORKOUT_ORDER = [
   'aphrodite',
   'apollon',
+  'artemis',
   'dione',
+  'hades',
   'iris',
   'metis',
+  'poseidon',
+  'prometheus',
   'venus',
+  'zeus',
 ]
 
 const WORKOUT_IMAGES = {
   aphrodite: 'assets/workouts/aphrodite.webp',
   apollon: 'assets/workouts/apollon.webp',
+  artemis: 'assets/workouts/artemis.webp',
   dione: 'assets/workouts/dione.webp',
+  hades: 'assets/workouts/hades.webp',
   iris: 'assets/workouts/iris.webp',
   metis: 'assets/workouts/metis.webp',
+  poseidon: 'assets/workouts/poseidon.webp',
+  prometheus: 'assets/workouts/prometheus.webp',
   venus: 'assets/workouts/venus.webp',
+  zeus: 'assets/workouts/zeus.webp',
 }
 
 const formatTime = (totalSeconds) => {

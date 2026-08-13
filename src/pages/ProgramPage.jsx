@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { freeleticsProgram } from '../data/freeleticsProgram'
+import AppBrandHeader from '../components/AppBrandHeader'
 import BottomNavigation from '../components/BottomNavigation'
 
 const PROGRAM_PROGRESS_KEY = 'freeletics-program-progress'
@@ -19,19 +20,6 @@ const TrophyIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" />
     <path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6" />
-  </svg>
-)
-
-const ChartIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-  </svg>
-)
-
-const SettingsIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.5 19.3a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.1 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2.3V9.6h.1A1.7 1.7 0 0 0 4 8.5a1.7 1.7 0 0 0-.34-1.88L3.6 6.56 6.46 3.7l.06.06A1.7 1.7 0 0 0 8.4 4.1a1.7 1.7 0 0 0 1-.6A1.7 1.7 0 0 0 9.8 2.4v-.1h4v.1A1.7 1.7 0 0 0 15 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.4a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.7 1.2Z" />
   </svg>
 )
 
@@ -53,20 +41,13 @@ const CheckIcon = () => (
     <path d="m5 12 4 4L19 6" />
   </svg>
 )
-const WorkoutIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M6.5 6.5v11M3.5 8.5v7M17.5 6.5v11M20.5 8.5v7M6.5 12h11" />
-  </svg>
-)
 
 const readProgramProgress = () => {
   try {
     const storedProgress = localStorage.getItem(PROGRAM_PROGRESS_KEY)
 
     if (!storedProgress) {
-      return {
-        completedSessions: [],
-      }
+      return { completedSessions: [] }
     }
 
     const parsedProgress = JSON.parse(storedProgress)
@@ -78,10 +59,7 @@ const readProgramProgress = () => {
     }
   } catch (error) {
     console.error('No se pudo cargar el progreso:', error)
-
-    return {
-      completedSessions: [],
-    }
+    return { completedSessions: [] }
   }
 }
 
@@ -89,11 +67,7 @@ const readCurrentSession = () => {
   try {
     const storedSession = localStorage.getItem(CURRENT_SESSION_KEY)
 
-    if (!storedSession) {
-      return null
-    }
-
-    return JSON.parse(storedSession)
+    return storedSession ? JSON.parse(storedSession) : null
   } catch (error) {
     console.error('No se pudo cargar la sesión actual:', error)
     return null
@@ -102,10 +76,8 @@ const readCurrentSession = () => {
 
 function ProgramPage() {
   const navigate = useNavigate()
-
   const progress = useMemo(() => readProgramProgress(), [])
   const storedSession = useMemo(() => readCurrentSession(), [])
-
   const completedSessionIds = progress.completedSessions
 
   const totalSessions = useMemo(() => {
@@ -121,10 +93,7 @@ function ProgramPage() {
         const sessionId = `${week.week}-${session.session}`
 
         if (!completedSessionIds.includes(sessionId)) {
-          return {
-            week,
-            session,
-          }
+          return { week, session }
         }
       }
     }
@@ -164,45 +133,34 @@ function ProgramPage() {
       return
     }
 
-    navigate(
-      `/sesion/${currentWeek.week}/${currentSession.session}`
-    )
+    navigate(`/sesion/${currentWeek.week}/${currentSession.session}`)
   }
 
   const openSession = (weekNumber, sessionNumber, isLocked) => {
-    if (isLocked) {
-      return
+    if (!isLocked) {
+      navigate(`/sesion/${weekNumber}/${sessionNumber}`)
     }
-
-    navigate(`/sesion/${weekNumber}/${sessionNumber}`)
   }
 
-  const isWeekLocked = (weekNumber) => {
-    return weekNumber > currentWeek.week
-  }
+  const isWeekLocked = (weekNumber) => weekNumber > currentWeek.week
 
   return (
     <main className="program-page">
       <div className="program-mineral-background" />
 
       <section className="program-shell">
-        <header className="program-header">
-          <div>
-            <span className="program-header-label">
-              PROGRAMA DE ENTRENAMIENTO
-            </span>
-
-            <h1>Tu plan</h1>
-          </div>
-
-          <button
-            type="button"
-            className="program-settings-button"
-            aria-label="Ajustes"
-          >
-            <SettingsIcon />
-          </button>
-        </header>
+        <AppBrandHeader
+          eyebrow="PROGRAMA DE ENTRENAMIENTO"
+          title="Tu plan"
+          action={
+            <div
+              className="program-header-icon"
+              aria-hidden="true"
+            >
+              <CalendarIcon />
+            </div>
+          }
+        />
 
         <section className="program-week-card">
           <div className="program-week-heading">
@@ -219,11 +177,7 @@ function ProgramPage() {
           </div>
 
           <div className="program-week-progress">
-            <span
-              style={{
-                width: `${weeklyPercentage}%`,
-              }}
-            />
+            <span style={{ width: `${weeklyPercentage}%` }} />
           </div>
 
           <div className="program-week-meta">
@@ -231,7 +185,6 @@ function ProgramPage() {
               {completedInCurrentWeek} de {currentWeek.sessions.length}{' '}
               sesiones
             </span>
-
             <span>
               {currentWeek.minimumCompletionPercentage} % mínimo
             </span>
@@ -246,7 +199,6 @@ function ProgramPage() {
               <span className="program-featured-label">
                 SIGUIENTE ENTRENAMIENTO
               </span>
-
               <span className="program-session-number">
                 SESIÓN {currentSession.session}
               </span>
@@ -258,7 +210,6 @@ function ProgramPage() {
                   SEMANA {currentWeek.week} · SESIÓN{' '}
                   {currentSession.session}
                 </p>
-
                 <h2>{currentSession.name}</h2>
 
                 {hasPausedCurrentSession && (
@@ -278,12 +229,10 @@ function ProgramPage() {
                 <span>Semana</span>
                 <strong>{currentWeek.week} / 15</strong>
               </article>
-
               <article>
                 <span>Bloques</span>
                 <strong>{currentSession.steps.length}</strong>
               </article>
-
               <article>
                 <span>Estado</span>
                 <strong>
@@ -298,7 +247,6 @@ function ProgramPage() {
               onClick={startCurrentSession}
             >
               <PlayIcon />
-
               <span>
                 {hasPausedCurrentSession
                   ? 'CONTINUAR SESIÓN'
@@ -311,12 +259,8 @@ function ProgramPage() {
             <div className="program-finished-icon">
               <TrophyIcon />
             </div>
-
             <h2>Programa completado</h2>
-
-            <p>
-              Has completado las 15 semanas y las 73 sesiones.
-            </p>
+            <p>Has completado las 15 semanas y las 73 sesiones.</p>
           </section>
         )}
 
@@ -325,7 +269,6 @@ function ProgramPage() {
             <div className="program-challenge-icon">
               <TrophyIcon />
             </div>
-
             <div>
               <span>RETO DE LA SEMANA</span>
               <p>{currentWeek.challenge}</p>
@@ -339,23 +282,19 @@ function ProgramPage() {
               <span>PROGRAMA COMPLETO</span>
               <h2>15 semanas</h2>
             </div>
-
             <strong>{totalPercentage} %</strong>
           </div>
 
           <div className="program-week-list">
             {freeleticsProgram.map((week) => {
               const locked = isWeekLocked(week.week)
-
               const completedSessions = week.sessions.filter((session) =>
                 completedSessionIds.includes(
                   `${week.week}-${session.session}`
                 )
               ).length
-
               const weekCompleted =
                 completedSessions === week.sessions.length
-
               const weekPercentage =
                 week.sessions.length === 0
                   ? 0
@@ -392,32 +331,24 @@ function ProgramPage() {
                   <div className="program-week-item-content">
                     <div>
                       <h3>{week.title}</h3>
-
                       <span>
                         {completedSessions} de {week.sessions.length}{' '}
                         sesiones
                       </span>
                     </div>
-
                     <strong>{weekPercentage} %</strong>
                   </div>
 
                   <div className="program-week-item-progress">
-                    <span
-                      style={{
-                        width: `${weekPercentage}%`,
-                      }}
-                    />
+                    <span style={{ width: `${weekPercentage}%` }} />
                   </div>
 
                   {!locked && (
                     <div className="program-session-buttons">
                       {week.sessions.map((session) => {
                         const sessionId = `${week.week}-${session.session}`
-
                         const completed =
                           completedSessionIds.includes(sessionId)
-
                         const isCurrent =
                           week.week === currentWeek.week &&
                           session.session === currentSession?.session
@@ -446,11 +377,7 @@ function ProgramPage() {
                             }
                             aria-label={`Semana ${week.week}, sesión ${session.session}`}
                           >
-                            {completed ? (
-                              <CheckIcon />
-                            ) : (
-                              session.session
-                            )}
+                            {completed ? <CheckIcon /> : session.session}
                           </button>
                         )
                       })}
@@ -462,8 +389,8 @@ function ProgramPage() {
           </div>
         </section>
       </section>
+
       <BottomNavigation activeItem="program" />
-      
     </main>
   )
 }

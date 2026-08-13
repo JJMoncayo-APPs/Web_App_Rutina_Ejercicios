@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/Web_App_Rutina_Ejercicios/dev-sw.js?dev-sw', { scope: '/Web_App_Rutina_Ejercicios/', type: 'classic' })

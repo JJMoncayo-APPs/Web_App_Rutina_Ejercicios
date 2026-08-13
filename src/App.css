@@ -3584,3 +3584,193 @@ img {
     0 12px 28px rgba(0, 0, 0, 0.35),
     0 0 20px rgba(23, 70, 199, 0.2);
 }
+.program-header-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid rgba(85, 123, 232, 0.35);
+  border-radius: 14px;
+  background: rgba(23, 70, 199, 0.16);
+  color: #7799f4;
+}
+
+.program-header-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 480px) {
+  .program-header-icon {
+    width: 43px;
+    height: 43px;
+    flex-basis: 43px;
+  }
+
+  .program-header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+/* =========================================================
+   CABECERA DE MARCA COMPARTIDA
+   ========================================================= */
+
+.app-brand-header {
+  display: grid;
+  width: 100%;
+  gap: 24px;
+  padding-bottom: 6px;
+}
+
+.app-brand-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-brand-logo {
+  display: block;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border: 1px solid rgba(85, 123, 232, 0.35);
+  border-radius: 50%;
+  background-color: #15171c;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(23, 70, 199, 0.2);
+}
+
+.app-brand-name {
+  display: grid;
+  gap: 3px;
+}
+
+.app-brand-name strong {
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.075em;
+}
+
+.app-brand-name span {
+  color: #7b91c8;
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.18em;
+}
+
+.app-brand-page-heading {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.app-brand-page-heading > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.app-brand-eyebrow {
+  color: var(--app-blue-bright);
+  font-size: 0.67rem;
+  font-weight: 950;
+  line-height: 1.2;
+  letter-spacing: 0.13em;
+}
+
+.app-brand-page-heading h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.3rem, 9vw, 3.4rem);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.app-brand-page-heading p {
+  max-width: 500px;
+  margin: 2px 0 0;
+  color: var(--app-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.app-brand-action {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.program-header-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(85, 123, 232, 0.35);
+  border-radius: 14px;
+  background: rgba(23, 70, 199, 0.16);
+  color: #7799f4;
+}
+
+.program-header-icon svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 480px) {
+  .app-brand-header {
+    gap: 20px;
+  }
+
+  .app-brand-logo {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+  }
+
+  .app-brand-name strong {
+    font-size: 0.84rem;
+  }
+
+  .app-brand-name span {
+    font-size: 0.53rem;
+  }
+
+  .app-brand-page-heading {
+    gap: 12px;
+  }
+
+  .program-header-icon {
+    width: 43px;
+    height: 43px;
+    flex: 0 0 43px;
+  }
+
+  .program-header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+}

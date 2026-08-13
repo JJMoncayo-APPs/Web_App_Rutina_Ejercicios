@@ -68,7 +68,7 @@ export const exercises = {
     category: 'legs',
     measurement: 'repetitions',
     image: 'assets/exercises/squats.webp',
-    modifiedImage: 'assets/exercises/squats-modified.webp',
+    modifiedImage: null,
     instructions:
       'Baja la cadera por debajo de la altura de las rodillas y vuelve a la posición de pie.',
     modifiedInstructions:
@@ -83,7 +83,7 @@ export const exercises = {
     category: 'legs',
     measurement: 'repetitions',
     image: 'assets/exercises/deep-squats.webp',
-    modifiedImage: 'assets/exercises/deep-squats-modified.webp',
+    modifiedImage: null,
     instructions:
       'Baja la cadera de manera controlada hasta alcanzar la máxima profundidad posible y vuelve a levantarte.',
     modifiedInstructions:
@@ -98,7 +98,7 @@ export const exercises = {
     category: 'core',
     measurement: 'repetitions',
     image: 'assets/exercises/situps.webp',
-    modifiedImage: 'assets/exercises/situps-modified.webp',
+    modifiedImage: null,
     instructions:
       'Desde una posición sentada, baja el tronco hasta el suelo y vuelve a incorporarte.',
     modifiedInstructions:
@@ -113,7 +113,7 @@ export const exercises = {
     category: 'core',
     measurement: 'repetitions',
     image: 'assets/exercises/leg-levers.webp',
-    modifiedImage: 'assets/exercises/leg-levers-modified.webp',
+    modifiedImage: null,
     instructions:
       'Tumbado boca arriba, eleva las piernas juntas hasta colocarlas verticales y bájalas de forma controlada.',
     modifiedInstructions:
@@ -142,7 +142,7 @@ export const exercises = {
     category: 'cardio',
     measurement: 'repetitions',
     image: 'assets/exercises/climbers.webp',
-    modifiedImage: 'assets/exercises/climbers-modified.webp',
+    modifiedImage: null,
     instructions:
       'Desde la posición de plancha, lleva alternativamente cada pie hacia la altura de las manos.',
     modifiedInstructions:
@@ -157,7 +157,7 @@ export const exercises = {
     category: 'cardio',
     measurement: 'repetitions',
     image: 'assets/exercises/high-jumps.webp',
-    modifiedImage: 'assets/exercises/high-jumps-modified.webp',
+    modifiedImage: null,
     instructions:
       'Salta verticalmente elevando las rodillas y aterriza suavemente.',
     modifiedInstructions:
@@ -182,12 +182,12 @@ export const exercises = {
 
   jackknives: {
     id: 'jackknives',
-    name: 'Jackknives',
-    shortName: 'Jackknives',
+    name: 'Jackknifes',
+    shortName: 'Jackknifes',
     category: 'core',
     measurement: 'repetitions',
     image: 'assets/exercises/jackknives.webp',
-    modifiedImage: 'assets/exercises/jackknives-modified.webp',
+    modifiedImage: null,
     instructions:
       'Eleva simultáneamente las piernas y el tronco hasta acercar las manos a los pies.',
     modifiedInstructions:
@@ -202,7 +202,7 @@ export const exercises = {
     category: 'cardio',
     measurement: 'distance',
     image: 'assets/exercises/running.webp',
-    modifiedImage: 'assets/exercises/running-modified.webp',
+    modifiedImage: null,
     instructions:
       'Completa la distancia indicada a un ritmo que puedas mantener con seguridad.',
     modifiedInstructions:

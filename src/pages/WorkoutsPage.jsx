@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { workouts } from '../data/freeleticsProgram'
 import { getWorkoutStatistics } from '../services/workoutHistoryService'
-import BottomNavigation from '../components/BottomNavigation'
 
 const WORKOUT_ORDER = ['aphrodite', 'apollon', 'dione', 'iris', 'metis', 'venus']
 
@@ -121,14 +120,16 @@ function WorkoutsPage() {
       <div className="workouts-mineral-background" />
 
       <section className="workouts-shell">
-        <header className="workouts-header">
-          <div>
-            <span className="workouts-header-label">ENTRENAMIENTO LIBRE</span>
-            <h1>Workouts</h1>
-            <p>Entrena cualquier workout cuando quieras. Tus tiempos quedarán registrados y podrán mejorar tu marca personal.</p>
-          </div>
-          <div className="workouts-header-icon"><WorkoutIcon /></div>
-        </header>
+        <AppBrandHeader
+          eyebrow="ENTRENAMIENTO LIBRE"
+          title="Workouts"
+          description="Entrena cualquier workout cuando quieras. Tus tiempos quedarán registrados y podrán mejorar tu marca personal."
+          action={
+            <div className="workouts-header-icon" aria-hidden="true">
+              <WorkoutIcon />
+            </div>
+          }
+        />
 
         <section className="workouts-information-card">
           <div className="workouts-information-icon"><TrophyIcon /></div>
@@ -185,9 +186,18 @@ function WorkoutsPage() {
           ))}
         </section>
       </section>
-<BottomNavigation activeItem="workouts" />
-      
 
+      <nav className="program-navigation">
+        <button type="button" className="program-navigation-button" onClick={() => navigate('/programa')}>
+          <CalendarIcon /><span>Programa</span>
+        </button>
+        <button type="button" className="program-navigation-button program-navigation-button-active" onClick={() => navigate('/workouts')}>
+          <WorkoutIcon /><span>Workouts</span>
+        </button>
+        <button type="button" className="program-navigation-button"><ChartIcon /><span>Progreso</span></button>
+        <button type="button" className="program-navigation-button"><TrophyIcon /><span>Marcas</span></button>
+        <button type="button" className="program-navigation-button"><SettingsIcon /><span>Ajustes</span></button>
+      </nav>
     </main>
   )
 }

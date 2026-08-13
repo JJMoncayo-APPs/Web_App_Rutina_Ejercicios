@@ -1,6 +1,7 @@
 // src/pages/RecordsPage.jsx
 
 import { useMemo, useRef, useState } from 'react'
+import AppBrandHeader from '../components/AppBrandHeader'
 import BottomNavigation from '../components/BottomNavigation'
 import { maxExercises, workouts } from '../data/freeleticsProgram'
 import {
@@ -255,20 +256,16 @@ function RecordsPage() {
       <div className="records-mineral-background" />
 
       <section className="records-shell">
-        <header className="records-header">
-          <div>
-            <span className="records-header-label">RESULTADOS</span>
-            <h1>Marcas</h1>
-            <p>
-              Consulta tus tres mejores tiempos y tus récords de
-              repeticiones MAX.
-            </p>
-          </div>
-
-          <div className="records-header-icon">
-            <TrophyIcon />
-          </div>
-        </header>
+        <AppBrandHeader
+          eyebrow="RESULTADOS"
+          title="Marcas"
+          description="Consulta tus tres mejores tiempos y tus récords de repeticiones MAX."
+          action={
+            <div className="records-header-icon" aria-hidden="true">
+              <TrophyIcon />
+            </div>
+          }
+        />
 
         <section className="records-summary">
           <article>

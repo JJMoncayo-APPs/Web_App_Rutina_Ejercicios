@@ -1,6 +1,7 @@
 // src/pages/SettingsPage.jsx
 
 import { useState } from 'react'
+import AppBrandHeader from '../components/AppBrandHeader'
 import BottomNavigation from '../components/BottomNavigation'
 import {
   getAppSettings,
@@ -113,17 +114,16 @@ function SettingsPage() {
       <div className="settings-mineral-background" />
 
       <section className="settings-shell">
-        <header className="settings-header">
-          <div>
-            <span className="settings-header-label">PREFERENCIAS</span>
-            <h1>Ajustes</h1>
-            <p>Configura la experiencia de entrenamiento y gestiona tus datos.</p>
-          </div>
-
-          <div className="settings-header-icon">
-            <GearIcon />
-          </div>
-        </header>
+        <AppBrandHeader
+          eyebrow="PREFERENCIAS"
+          title="Ajustes"
+          description="Configura la experiencia de entrenamiento y gestiona tus datos."
+          action={
+            <div className="settings-header-icon" aria-hidden="true">
+              <GearIcon />
+            </div>
+          }
+        />
 
         {message && <div className="settings-message">{message}</div>}
 
@@ -235,18 +235,9 @@ function SettingsPage() {
         </section>
 
         <footer className="settings-footer">
-  <div
-    className="settings-footer-logo"
-    role="img"
-    aria-label="Logo de Free Athlete"
-    style={{
-      backgroundImage: `url("${import.meta.env.BASE_URL}assets/branding/free-athlete-logo.png")`,
-    }}
-  />
-
-  <strong>Free Athlete</strong>
-  <span>Versión 1.0.0</span>
-</footer>
+          <strong>FitHome IA</strong>
+          <span>Versión 1.0.0</span>
+        </footer>
       </section>
 
       <BottomNavigation activeItem="settings" />

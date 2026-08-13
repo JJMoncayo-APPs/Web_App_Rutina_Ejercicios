@@ -2,7 +2,6 @@
 
 const HISTORY_STORAGE_KEY = 'freeletics-workout-history'
 const BEST_TIMES_STORAGE_KEY = 'freeletics-best-times'
-
 const VALID_SOURCES = ['program', 'standalone']
 
 const createHistoryId = () => {
@@ -17,9 +16,7 @@ const createHistoryId = () => {
 }
 
 const normalizeWorkoutId = (workoutId) => {
-  return String(workoutId || '')
-    .trim()
-    .toLowerCase()
+  return String(workoutId || '').trim().toLowerCase()
 }
 
 const readJsonStorage = (storageKey, fallbackValue) => {
@@ -32,11 +29,7 @@ const readJsonStorage = (storageKey, fallbackValue) => {
 
     return JSON.parse(storedValue)
   } catch (error) {
-    console.error(
-      `No se pudo leer ${storageKey} desde localStorage:`,
-      error
-    )
-
+    console.error(`No se pudo leer ${storageKey}:`, error)
     return fallbackValue
   }
 }
@@ -46,13 +39,35 @@ const writeJsonStorage = (storageKey, value) => {
     localStorage.setItem(storageKey, JSON.stringify(value))
     return true
   } catch (error) {
-    console.error(
-      `No se pudo guardar ${storageKey} en localStorage:`,
-      error
-    )
-
+    console.error(`No se pudo guardar ${storageKey}:`, error)
     return false
   }
+}
+
+const isValidWorkoutResult = (result) => {
+  return Boolean(
+    result &&
+      normalizeWorkoutId(result.workoutId) &&
+      Number(result.elapsedSeconds) > 0
+  )
+}
+
+const sortByDateDescending = (resultA, resultB) => {
+  const dateA = new Date(resultA.completedAt).getTime() || 0
+  const dateB = new Date(resultB.completedAt).getTime() || 0
+
+  return dateB - dateA
+}
+
+const sortByTimeAscending = (resultA, resultB) => {
+  const timeDifference =
+    Number(resultA.elapsedSeconds) - Number(resultB.elapsedSeconds)
+
+  if (timeDifference !== 0) {
+    return timeDifference
+  }
+
+  return sortByDateDescending(resultA, resultB)
 }
 
 /* =========================================================
@@ -62,7 +77,9 @@ const writeJsonStorage = (storageKey, value) => {
 export const getWorkoutHistory = () => {
   const storedHistory = readJsonStorage(HISTORY_STORAGE_KEY, [])
 
-  return Array.isArray(storedHistory) ? storedHistory : []
+  return Array.isArray(storedHistory)
+    ? storedHistory.filter(isValidWorkoutResult)
+    : []
 }
 
 export const saveWorkoutHistory = (history) => {
@@ -70,12 +87,16 @@ export const saveWorkoutHistory = (history) => {
     return false
   }
 
-  return writeJsonStorage(HISTORY_STORAGE_KEY, history)
+  return writeJsonStorage(
+    HISTORY_STORAGE_KEY,
+    history.filter(isValidWorkoutResult)
+  )
 }
 
 export const clearWorkoutHistory = () => {
   try {
     localStorage.removeItem(HISTORY_STORAGE_KEY)
+    localStorage.removeItem(BEST_TIMES_STORAGE_KEY)
     return true
   } catch (error) {
     console.error('No se pudo borrar el historial:', error)
@@ -84,7 +105,7 @@ export const clearWorkoutHistory = () => {
 }
 
 /* =========================================================
-   MEJORES TIEMPOS
+   MEJORES TIEMPOS Y PODIO
    ========================================================= */
 
 export const getBestTimes = () => {
@@ -108,16 +129,37 @@ export const getWorkoutBestTime = (workoutId) => {
     return null
   }
 
-  const bestTimes = getBestTimes()
-  const storedTime = Number(bestTimes[normalizedWorkoutId])
+  const storedTime = Number(getBestTimes()[normalizedWorkoutId])
 
   return storedTime > 0 ? storedTime : null
 }
 
-export const updateWorkoutBestTime = (
-  workoutId,
-  elapsedSeconds
-) => {
+export const getWorkoutTopResults = (workoutId, limit = 3) => {
+  const normalizedWorkoutId = normalizeWorkoutId(workoutId)
+  const numericLimit = Math.max(1, Number(limit) || 3)
+
+  if (!normalizedWorkoutId) {
+    return []
+  }
+
+  return getWorkoutHistory()
+    .filter(
+      (result) =>
+        normalizeWorkoutId(result.workoutId) === normalizedWorkoutId
+    )
+    .sort(sortByTimeAscending)
+    .slice(0, numericLimit)
+    .map((result, index) => ({
+      ...result,
+      position: index + 1,
+    }))
+}
+
+export const getWorkoutTopThree = (workoutId) => {
+  return getWorkoutTopResults(workoutId, 3)
+}
+
+export const updateWorkoutBestTime = (workoutId, elapsedSeconds) => {
   const normalizedWorkoutId = normalizeWorkoutId(workoutId)
   const numericTime = Number(elapsedSeconds)
 
@@ -132,13 +174,11 @@ export const updateWorkoutBestTime = (
   const bestTimes = getBestTimes()
   const previousBestSeconds =
     Number(bestTimes[normalizedWorkoutId]) || null
-
   const isNewPersonalBest =
     !previousBestSeconds || numericTime < previousBestSeconds
 
   if (isNewPersonalBest) {
     bestTimes[normalizedWorkoutId] = numericTime
-
     writeJsonStorage(BEST_TIMES_STORAGE_KEY, bestTimes)
   }
 
@@ -174,17 +214,14 @@ export const registerWorkoutResult = ({
     return null
   }
 
-  if (numericTime <= 0) {
-    console.error(
-      'No se puede registrar un workout sin un tiempo válido'
-    )
+  if (!Number.isFinite(numericTime) || numericTime <= 0) {
+    console.error('El tiempo del workout no es válido')
     return null
   }
 
   const normalizedSource = VALID_SOURCES.includes(source)
     ? source
     : 'standalone'
-
   const bestTimeResult = updateWorkoutBestTime(
     normalizedWorkoutId,
     numericTime
@@ -192,45 +229,28 @@ export const registerWorkoutResult = ({
 
   const result = {
     id: createHistoryId(),
-
     workoutId: normalizedWorkoutId,
     workoutName: String(workoutName || normalizedWorkoutId),
-
     source: normalizedSource,
-
-    weekNumber:
-      weekNumber === null ? null : Number(weekNumber),
-
+    weekNumber: weekNumber === null ? null : Number(weekNumber),
     sessionNumber:
       sessionNumber === null ? null : Number(sessionNumber),
-
     startedAt:
-      startedAt || new Date(Date.now() - numericTime * 1000).toISOString(),
-
+      startedAt ||
+      new Date(Date.now() - numericTime * 1000).toISOString(),
     completedAt: completedAt || new Date().toISOString(),
-
     elapsedSeconds: numericTime,
-
-    previousBestSeconds:
-      bestTimeResult.previousBestSeconds,
-
-    bestTimeSeconds:
-      bestTimeResult.bestTimeSeconds,
-
-    isPersonalBest:
-      bestTimeResult.updated,
-
+    previousBestSeconds: bestTimeResult.previousBestSeconds,
+    bestTimeSeconds: bestTimeResult.bestTimeSeconds,
+    isPersonalBest: bestTimeResult.updated,
     completedWithModifiedExercises:
       completedWithModifiedExercises === true,
   }
 
   const history = getWorkoutHistory()
-
   history.push(result)
 
-  const saved = saveWorkoutHistory(history)
-
-  if (!saved) {
+  if (!saveWorkoutHistory(history)) {
     return null
   }
 
@@ -251,21 +271,13 @@ export const getWorkoutResults = (workoutId) => {
   return getWorkoutHistory()
     .filter(
       (result) =>
-        normalizeWorkoutId(result.workoutId) ===
-        normalizedWorkoutId
+        normalizeWorkoutId(result.workoutId) === normalizedWorkoutId
     )
-    .sort((resultA, resultB) => {
-      const dateA = new Date(resultA.completedAt).getTime()
-      const dateB = new Date(resultB.completedAt).getTime()
-
-      return dateB - dateA
-    })
+    .sort(sortByDateDescending)
 }
 
 export const getWorkoutLastResult = (workoutId) => {
-  const results = getWorkoutResults(workoutId)
-
-  return results[0] || null
+  return getWorkoutResults(workoutId)[0] || null
 }
 
 export const getWorkoutCompletionCount = (workoutId) => {
@@ -275,39 +287,32 @@ export const getWorkoutCompletionCount = (workoutId) => {
 export const getWorkoutStatistics = (workoutId) => {
   const normalizedWorkoutId = normalizeWorkoutId(workoutId)
   const results = getWorkoutResults(normalizedWorkoutId)
-  const bestTimeSeconds = getWorkoutBestTime(normalizedWorkoutId)
+  const topResults = getWorkoutTopThree(normalizedWorkoutId)
+  const bestTimeSeconds = topResults[0]?.elapsedSeconds || null
   const lastResult = results[0] || null
-
   const totalTimeSeconds = results.reduce(
-    (total, result) =>
-      total + Number(result.elapsedSeconds || 0),
+    (total, result) => total + Number(result.elapsedSeconds || 0),
     0
   )
-
   const averageTimeSeconds =
     results.length === 0
       ? null
       : Math.round(totalTimeSeconds / results.length)
 
-  const standaloneCount = results.filter(
-    (result) => result.source === 'standalone'
-  ).length
-
-  const programCount = results.filter(
-    (result) => result.source === 'program'
-  ).length
-
   return {
     workoutId: normalizedWorkoutId,
     completedCount: results.length,
-    standaloneCount,
-    programCount,
+    standaloneCount: results.filter(
+      (result) => result.source === 'standalone'
+    ).length,
+    programCount: results.filter(
+      (result) => result.source === 'program'
+    ).length,
     bestTimeSeconds,
-    lastTimeSeconds:
-      Number(lastResult?.elapsedSeconds) || null,
+    topResults,
+    lastTimeSeconds: Number(lastResult?.elapsedSeconds) || null,
     averageTimeSeconds,
-    lastCompletedAt:
-      lastResult?.completedAt || null,
+    lastCompletedAt: lastResult?.completedAt || null,
     lastResult,
   }
 }
@@ -320,55 +325,19 @@ export const getRecentWorkoutResults = (limit = 10) => {
   const numericLimit = Math.max(1, Number(limit) || 10)
 
   return getWorkoutHistory()
-    .sort((resultA, resultB) => {
-      const dateA = new Date(resultA.completedAt).getTime()
-      const dateB = new Date(resultB.completedAt).getTime()
-
-      return dateB - dateA
-    })
+    .sort(sortByDateDescending)
     .slice(0, numericLimit)
 }
 
 export const getPersonalBestResults = () => {
   return getWorkoutHistory()
     .filter((result) => result.isPersonalBest === true)
-    .sort((resultA, resultB) => {
-      const dateA = new Date(resultA.completedAt).getTime()
-      const dateB = new Date(resultB.completedAt).getTime()
-
-      return dateB - dateA
-    })
+    .sort(sortByDateDescending)
 }
 
 /* =========================================================
-   ELIMINAR RESULTADOS
+   ELIMINAR Y RECALCULAR
    ========================================================= */
-
-export const deleteWorkoutResult = (resultId) => {
-  if (!resultId) {
-    return false
-  }
-
-  const currentHistory = getWorkoutHistory()
-
-  const updatedHistory = currentHistory.filter(
-    (result) => result.id !== resultId
-  )
-
-  if (updatedHistory.length === currentHistory.length) {
-    return false
-  }
-
-  const saved = saveWorkoutHistory(updatedHistory)
-
-  if (!saved) {
-    return false
-  }
-
-  rebuildBestTimesFromHistory()
-
-  return true
-}
 
 export const rebuildBestTimesFromHistory = () => {
   const history = getWorkoutHistory()
@@ -389,12 +358,56 @@ export const rebuildBestTimesFromHistory = () => {
     }
   })
 
-  writeJsonStorage(
-    BEST_TIMES_STORAGE_KEY,
-    rebuiltBestTimes
-  )
+  writeJsonStorage(BEST_TIMES_STORAGE_KEY, rebuiltBestTimes)
 
   return rebuiltBestTimes
+}
+
+export const deleteWorkoutResult = (resultId) => {
+  if (!resultId) {
+    return false
+  }
+
+  const currentHistory = getWorkoutHistory()
+  const updatedHistory = currentHistory.filter(
+    (result) => result.id !== resultId
+  )
+
+  if (updatedHistory.length === currentHistory.length) {
+    return false
+  }
+
+  if (!saveWorkoutHistory(updatedHistory)) {
+    return false
+  }
+
+  rebuildBestTimesFromHistory()
+  return true
+}
+
+export const deleteWorkoutResults = (workoutId) => {
+  const normalizedWorkoutId = normalizeWorkoutId(workoutId)
+
+  if (!normalizedWorkoutId) {
+    return false
+  }
+
+  const currentHistory = getWorkoutHistory()
+  const updatedHistory = currentHistory.filter(
+    (result) =>
+      normalizeWorkoutId(result.workoutId) !== normalizedWorkoutId
+  )
+
+  if (updatedHistory.length === currentHistory.length) {
+    return false
+  }
+
+  if (!saveWorkoutHistory(updatedHistory)) {
+    return false
+  }
+
+  rebuildBestTimesFromHistory()
+  return true
 }
 
 export default {
@@ -403,6 +416,8 @@ export default {
   clearWorkoutHistory,
   getBestTimes,
   getWorkoutBestTime,
+  getWorkoutTopResults,
+  getWorkoutTopThree,
   updateWorkoutBestTime,
   registerWorkoutResult,
   getWorkoutResults,
@@ -411,6 +426,7 @@ export default {
   getWorkoutStatistics,
   getRecentWorkoutResults,
   getPersonalBestResults,
-  deleteWorkoutResult,
   rebuildBestTimesFromHistory,
+  deleteWorkoutResult,
+  deleteWorkoutResults,
 }

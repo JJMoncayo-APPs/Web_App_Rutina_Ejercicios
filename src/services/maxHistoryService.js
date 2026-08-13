@@ -45,10 +45,45 @@ const writeJsonStorage = (storageKey, value) => {
   }
 }
 
+const isValidMaxResult = (result) => {
+  const repetitions = Number(result?.repetitions)
+
+  return Boolean(
+    result &&
+      normalizeMaxId(result.maxId) &&
+      Number.isFinite(repetitions) &&
+      repetitions >= 0
+  )
+}
+
+const sortByDateDescending = (resultA, resultB) => {
+  const dateA = new Date(resultA.completedAt).getTime() || 0
+  const dateB = new Date(resultB.completedAt).getTime() || 0
+
+  return dateB - dateA
+}
+
+const sortByRepetitionsDescending = (resultA, resultB) => {
+  const repetitionsDifference =
+    Number(resultB.repetitions) - Number(resultA.repetitions)
+
+  if (repetitionsDifference !== 0) {
+    return repetitionsDifference
+  }
+
+  return sortByDateDescending(resultA, resultB)
+}
+
+/* =========================================================
+   HISTORIAL COMPLETO
+   ========================================================= */
+
 export const getMaxHistory = () => {
   const storedHistory = readJsonStorage(MAX_HISTORY_STORAGE_KEY, [])
 
-  return Array.isArray(storedHistory) ? storedHistory : []
+  return Array.isArray(storedHistory)
+    ? storedHistory.filter(isValidMaxResult)
+    : []
 }
 
 export const saveMaxHistory = (history) => {
@@ -56,8 +91,26 @@ export const saveMaxHistory = (history) => {
     return false
   }
 
-  return writeJsonStorage(MAX_HISTORY_STORAGE_KEY, history)
+  return writeJsonStorage(
+    MAX_HISTORY_STORAGE_KEY,
+    history.filter(isValidMaxResult)
+  )
 }
+
+export const clearMaxHistory = () => {
+  try {
+    localStorage.removeItem(MAX_HISTORY_STORAGE_KEY)
+    localStorage.removeItem(MAX_BEST_RESULTS_STORAGE_KEY)
+    return true
+  } catch (error) {
+    console.error('No se pudo borrar el historial MAX:', error)
+    return false
+  }
+}
+
+/* =========================================================
+   MEJORES RESULTADOS Y PODIO
+   ========================================================= */
 
 export const getMaxBestResults = () => {
   const storedResults = readJsonStorage(
@@ -84,11 +137,38 @@ export const getMaxBestResult = (maxId) => {
   }
 
   const bestResults = getMaxBestResults()
+
+  if (bestResults[normalizedMaxId] === undefined) {
+    return null
+  }
+
   const repetitions = Number(bestResults[normalizedMaxId])
 
-  return repetitions >= 0 && bestResults[normalizedMaxId] !== undefined
+  return Number.isFinite(repetitions) && repetitions >= 0
     ? repetitions
     : null
+}
+
+export const getMaxTopResults = (maxId, limit = 3) => {
+  const normalizedMaxId = normalizeMaxId(maxId)
+  const numericLimit = Math.max(1, Number(limit) || 3)
+
+  if (!normalizedMaxId) {
+    return []
+  }
+
+  return getMaxHistory()
+    .filter((result) => result.maxId === normalizedMaxId)
+    .sort(sortByRepetitionsDescending)
+    .slice(0, numericLimit)
+    .map((result, index) => ({
+      ...result,
+      position: index + 1,
+    }))
+}
+
+export const getMaxTopThree = (maxId) => {
+  return getMaxTopResults(maxId, 3)
 }
 
 export const updateMaxBestResult = (maxId, repetitions) => {
@@ -113,7 +193,6 @@ export const updateMaxBestResult = (maxId, repetitions) => {
   const previousBestRepetitions = hasPreviousBest
     ? Number(bestResults[normalizedMaxId])
     : null
-
   const isNewPersonalBest =
     previousBestRepetitions === null ||
     numericRepetitions > previousBestRepetitions
@@ -131,6 +210,10 @@ export const updateMaxBestResult = (maxId, repetitions) => {
       : previousBestRepetitions,
   }
 }
+
+/* =========================================================
+   REGISTRAR UN MAX COMPLETADO
+   ========================================================= */
 
 export const registerMaxResult = ({
   maxId,
@@ -170,7 +253,6 @@ export const registerMaxResult = ({
   const normalizedSource = VALID_SOURCES.includes(source)
     ? source
     : 'standalone'
-
   const bestResult = updateMaxBestResult(
     normalizedMaxId,
     numericRepetitions
@@ -182,8 +264,7 @@ export const registerMaxResult = ({
     maxName: String(maxName || normalizedMaxId),
     exerciseId: String(exerciseId || ''),
     source: normalizedSource,
-    weekNumber:
-      weekNumber === null ? null : Number(weekNumber),
+    weekNumber: weekNumber === null ? null : Number(weekNumber),
     sessionNumber:
       sessionNumber === null ? null : Number(sessionNumber),
     durationSeconds: numericDuration,
@@ -203,8 +284,16 @@ export const registerMaxResult = ({
   const history = getMaxHistory()
   history.push(result)
 
-  return saveMaxHistory(history) ? result : null
+  if (!saveMaxHistory(history)) {
+    return null
+  }
+
+  return result
 }
+
+/* =========================================================
+   CONSULTAS POR MAX
+   ========================================================= */
 
 export const getMaxResults = (maxId) => {
   const normalizedMaxId = normalizeMaxId(maxId)
@@ -215,12 +304,7 @@ export const getMaxResults = (maxId) => {
 
   return getMaxHistory()
     .filter((result) => result.maxId === normalizedMaxId)
-    .sort((resultA, resultB) => {
-      return (
-        new Date(resultB.completedAt).getTime() -
-        new Date(resultA.completedAt).getTime()
-      )
-    })
+    .sort(sortByDateDescending)
 }
 
 export const getMaxLastResult = (maxId) => {
@@ -230,14 +314,13 @@ export const getMaxLastResult = (maxId) => {
 export const getMaxStatistics = (maxId) => {
   const normalizedMaxId = normalizeMaxId(maxId)
   const results = getMaxResults(normalizedMaxId)
+  const topResults = getMaxTopThree(normalizedMaxId)
   const lastResult = results[0] || null
-  const bestRepetitions = getMaxBestResult(normalizedMaxId)
-
+  const bestRepetitions = topResults[0]?.repetitions ?? null
   const totalRepetitions = results.reduce(
     (total, result) => total + Number(result.repetitions || 0),
     0
   )
-
   const averageRepetitions =
     results.length === 0
       ? null
@@ -253,6 +336,7 @@ export const getMaxStatistics = (maxId) => {
       (result) => result.source === 'program'
     ).length,
     bestRepetitions,
+    topResults,
     lastRepetitions:
       lastResult === null ? null : Number(lastResult.repetitions),
     averageRepetitions,
@@ -261,18 +345,21 @@ export const getMaxStatistics = (maxId) => {
   }
 }
 
+/* =========================================================
+   CONSULTAS GENERALES
+   ========================================================= */
+
 export const getRecentMaxResults = (limit = 10) => {
   const numericLimit = Math.max(1, Number(limit) || 10)
 
   return getMaxHistory()
-    .sort((resultA, resultB) => {
-      return (
-        new Date(resultB.completedAt).getTime() -
-        new Date(resultA.completedAt).getTime()
-      )
-    })
+    .sort(sortByDateDescending)
     .slice(0, numericLimit)
 }
+
+/* =========================================================
+   ELIMINAR Y RECALCULAR
+   ========================================================= */
 
 export const rebuildMaxBestResults = () => {
   const bestResults = {}
@@ -281,7 +368,11 @@ export const rebuildMaxBestResults = () => {
     const maxId = normalizeMaxId(result.maxId)
     const repetitions = Number(result.repetitions)
 
-    if (!maxId || !Number.isFinite(repetitions)) {
+    if (
+      !maxId ||
+      !Number.isFinite(repetitions) ||
+      repetitions < 0
+    ) {
       return
     }
 
@@ -294,6 +385,7 @@ export const rebuildMaxBestResults = () => {
   })
 
   writeJsonStorage(MAX_BEST_RESULTS_STORAGE_KEY, bestResults)
+
   return bestResults
 }
 
@@ -319,13 +411,45 @@ export const deleteMaxResult = (resultId) => {
   return true
 }
 
-export const clearMaxHistory = () => {
-  try {
-    localStorage.removeItem(MAX_HISTORY_STORAGE_KEY)
-    localStorage.removeItem(MAX_BEST_RESULTS_STORAGE_KEY)
-    return true
-  } catch (error) {
-    console.error('No se pudo borrar el historial MAX:', error)
+export const deleteMaxResults = (maxId) => {
+  const normalizedMaxId = normalizeMaxId(maxId)
+
+  if (!normalizedMaxId) {
     return false
   }
+
+  const currentHistory = getMaxHistory()
+  const updatedHistory = currentHistory.filter(
+    (result) => result.maxId !== normalizedMaxId
+  )
+
+  if (updatedHistory.length === currentHistory.length) {
+    return false
+  }
+
+  if (!saveMaxHistory(updatedHistory)) {
+    return false
+  }
+
+  rebuildMaxBestResults()
+  return true
+}
+
+export default {
+  getMaxHistory,
+  saveMaxHistory,
+  clearMaxHistory,
+  getMaxBestResults,
+  getMaxBestResult,
+  getMaxTopResults,
+  getMaxTopThree,
+  updateMaxBestResult,
+  registerMaxResult,
+  getMaxResults,
+  getMaxLastResult,
+  getMaxStatistics,
+  getRecentMaxResults,
+  rebuildMaxBestResults,
+  deleteMaxResult,
+  deleteMaxResults,
 }

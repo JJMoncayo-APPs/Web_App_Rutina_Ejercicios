@@ -1,16 +1,15 @@
 // src/pages/RecordsPage.jsx
 
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import BottomNavigation from '../components/BottomNavigation'
+import { maxExercises, workouts } from '../data/freeleticsProgram'
 import {
-  maxExercises,
-  workouts,
-} from '../data/freeleticsProgram'
-import {
+  deleteWorkoutResult,
   getRecentWorkoutResults,
   getWorkoutStatistics,
 } from '../services/workoutHistoryService'
 import {
+  deleteMaxResult,
   getMaxStatistics,
   getRecentMaxResults,
 } from '../services/maxHistoryService'
@@ -48,6 +47,8 @@ const MAX_IMAGES = {
   pushupMax: 'assets/exercises/pushups.webp',
   legLeverMax: 'assets/exercises/leg-levers.webp',
 }
+
+const LONG_PRESS_DELAY = 650
 
 const formatTime = (totalSeconds) => {
   const secondsValue = Number(totalSeconds)
@@ -115,6 +116,10 @@ const HistoryIcon = () => (
 )
 
 function RecordsPage() {
+  const [dataVersion, setDataVersion] = useState(0)
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const longPressTimerRef = useRef(null)
+
   const workoutRecords = useMemo(() => {
     return WORKOUT_ORDER.map((workoutId) => {
       const workout = workouts[workoutId]
@@ -129,7 +134,7 @@ function RecordsPage() {
         statistics: getWorkoutStatistics(workoutId),
       }
     }).filter(Boolean)
-  }, [])
+  }, [dataVersion])
 
   const maxRecords = useMemo(() => {
     return MAX_ORDER.map((maxId) => {
@@ -145,38 +150,26 @@ function RecordsPage() {
         statistics: getMaxStatistics(maxId),
       }
     }).filter(Boolean)
-  }, [])
-
-  const recentWorkoutResults = useMemo(
-    () => getRecentWorkoutResults(8),
-    []
-  )
-
-  const recentMaxResults = useMemo(
-    () => getRecentMaxResults(8),
-    []
-  )
+  }, [dataVersion])
 
   const recentResults = useMemo(() => {
-    const workoutItems = recentWorkoutResults.map((result) => ({
+    const workoutItems = getRecentWorkoutResults(10).map((result) => ({
       ...result,
       resultType: 'workout',
     }))
-
-    const maxItems = recentMaxResults.map((result) => ({
+    const maxItems = getRecentMaxResults(10).map((result) => ({
       ...result,
       resultType: 'max',
     }))
 
     return [...workoutItems, ...maxItems]
-      .sort((resultA, resultB) => {
-        return (
+      .sort(
+        (resultA, resultB) =>
           new Date(resultB.completedAt).getTime() -
           new Date(resultA.completedAt).getTime()
-        )
-      })
+      )
       .slice(0, 10)
-  }, [recentWorkoutResults, recentMaxResults])
+  }, [dataVersion])
 
   const workoutsWithRecords = workoutRecords.filter(
     ({ statistics }) => statistics.completedCount > 0
@@ -196,6 +189,67 @@ function RecordsPage() {
       0
     )
 
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  const startLongPress = (result) => {
+    clearLongPressTimer()
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      setPendingDelete(result)
+      longPressTimerRef.current = null
+    }, LONG_PRESS_DELAY)
+  }
+
+  const getLongPressProps = (result) => ({
+    onPointerDown: () => startLongPress(result),
+    onPointerUp: clearLongPressTimer,
+    onPointerCancel: clearLongPressTimer,
+    onPointerLeave: clearLongPressTimer,
+    onContextMenu: (event) => event.preventDefault(),
+  })
+
+  const confirmDelete = () => {
+    if (!pendingDelete) {
+      return
+    }
+
+    const deleted =
+      pendingDelete.resultType === 'max'
+        ? deleteMaxResult(pendingDelete.id)
+        : deleteWorkoutResult(pendingDelete.id)
+
+    if (deleted) {
+      setDataVersion((currentVersion) => currentVersion + 1)
+    }
+
+    setPendingDelete(null)
+  }
+
+  const getDeleteTitle = () => {
+    if (!pendingDelete) {
+      return ''
+    }
+
+    return pendingDelete.resultType === 'max'
+      ? pendingDelete.maxName
+      : pendingDelete.workoutName
+  }
+
+  const getDeleteValue = () => {
+    if (!pendingDelete) {
+      return ''
+    }
+
+    return pendingDelete.resultType === 'max'
+      ? formatRepetitions(pendingDelete.repetitions)
+      : formatTime(pendingDelete.elapsedSeconds)
+  }
+
   return (
     <main className="records-page">
       <div className="records-mineral-background" />
@@ -206,7 +260,7 @@ function RecordsPage() {
             <span className="records-header-label">RESULTADOS</span>
             <h1>Marcas</h1>
             <p>
-              Consulta tus mejores tiempos y tus récords de
+              Consulta tus tres mejores tiempos y tus récords de
               repeticiones MAX.
             </p>
           </div>
@@ -221,17 +275,19 @@ function RecordsPage() {
             <span>WORKOUTS CON MARCA</span>
             <strong>{workoutsWithRecords} / 6</strong>
           </article>
-
           <article>
             <span>MAX CON MARCA</span>
             <strong>{maxWithRecords} / 5</strong>
           </article>
-
           <article>
             <span>TOTAL COMPLETADOS</span>
             <strong>{totalCompleted}</strong>
           </article>
         </section>
+
+        <p className="records-long-press-help">
+          Mantén pulsado cualquier resultado para eliminarlo.
+        </p>
 
         <section className="records-section">
           <div className="records-section-heading">
@@ -259,35 +315,48 @@ function RecordsPage() {
                 <div className="record-card-content">
                   <div className="record-best-time">
                     <span>MEJOR TIEMPO</span>
-                    <strong>
-                      {formatTime(statistics.bestTimeSeconds)}
-                    </strong>
+                    <strong>{formatTime(statistics.bestTimeSeconds)}</strong>
                   </div>
+
+                  {statistics.topResults.length > 0 ? (
+                    <div className="records-podium-list">
+                      {statistics.topResults.map((result) => (
+                        <article
+                          key={result.id}
+                          className="records-podium-item"
+                          {...getLongPressProps({
+                            ...result,
+                            resultType: 'workout',
+                          })}
+                        >
+                          <span className={`records-position records-position-${result.position}`}>
+                            {result.position}º
+                          </span>
+                          <strong>{formatTime(result.elapsedSeconds)}</strong>
+                          <small>{formatDate(result.completedAt)}</small>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="records-no-podium">
+                      Todavía no hay resultados.
+                    </div>
+                  )}
 
                   <div className="record-card-details">
                     <div>
                       <span>Último</span>
-                      <strong>
-                        {formatTime(statistics.lastTimeSeconds)}
-                      </strong>
+                      <strong>{formatTime(statistics.lastTimeSeconds)}</strong>
                     </div>
                     <div>
                       <span>Media</span>
-                      <strong>
-                        {formatTime(statistics.averageTimeSeconds)}
-                      </strong>
+                      <strong>{formatTime(statistics.averageTimeSeconds)}</strong>
                     </div>
                     <div>
                       <span>Intentos</span>
                       <strong>{statistics.completedCount}</strong>
                     </div>
                   </div>
-
-                  <small>
-                    {statistics.lastCompletedAt
-                      ? `Última vez: ${formatDate(statistics.lastCompletedAt)}`
-                      : 'Todavía no has completado este workout'}
-                  </small>
                 </div>
               </article>
             ))}
@@ -304,74 +373,77 @@ function RecordsPage() {
           </div>
 
           <div className="records-max-grid">
-            {maxRecords.map(
-              ({ maxExercise, image, statistics }) => (
-                <article
-                  key={maxExercise.id}
-                  className="record-max-card"
-                >
-                  <div className="record-max-visual">
-                    {image && (
-                      <img
-                        src={image}
-                        alt={maxExercise.name}
-                      />
-                    )}
-                    <div className="record-max-overlay" />
-                    <div className="record-max-heading">
-                      <span>MAX</span>
-                      <h3>{maxExercise.name}</h3>
-                    </div>
+            {maxRecords.map(({ maxExercise, image, statistics }) => (
+              <article key={maxExercise.id} className="record-max-card">
+                <div className="record-max-visual">
+                  {image && <img src={image} alt={maxExercise.name} />}
+                  <div className="record-max-overlay" />
+                  <div className="record-max-heading">
+                    <span>MAX</span>
+                    <h3>{maxExercise.name}</h3>
+                  </div>
+                </div>
+
+                <div className="record-max-content">
+                  <div className="record-max-best">
+                    <span>MEJOR RESULTADO</span>
+                    <strong>
+                      {formatRepetitions(statistics.bestRepetitions)}
+                    </strong>
                   </div>
 
-                  <div className="record-max-content">
-                    <div className="record-max-best">
-                      <span>MEJOR RESULTADO</span>
+                  {statistics.topResults.length > 0 ? (
+                    <div className="records-podium-list">
+                      {statistics.topResults.map((result) => (
+                        <article
+                          key={result.id}
+                          className="records-podium-item"
+                          {...getLongPressProps({
+                            ...result,
+                            resultType: 'max',
+                          })}
+                        >
+                          <span className={`records-position records-position-${result.position}`}>
+                            {result.position}º
+                          </span>
+                          <strong>
+                            {formatRepetitions(result.repetitions)}
+                          </strong>
+                          <small>{formatDate(result.completedAt)}</small>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="records-no-podium">
+                      Todavía no hay resultados.
+                    </div>
+                  )}
+
+                  <div className="record-max-details">
+                    <div>
+                      <span>Último</span>
                       <strong>
-                        {formatRepetitions(
-                          statistics.bestRepetitions
-                        )}
+                        {formatRepetitions(statistics.lastRepetitions)}
                       </strong>
                     </div>
-
-                    <div className="record-max-details">
-                      <div>
-                        <span>Último</span>
-                        <strong>
-                          {formatRepetitions(
-                            statistics.lastRepetitions
-                          )}
-                        </strong>
-                      </div>
-                      <div>
-                        <span>Media</span>
-                        <strong>
-                          {formatRepetitions(
-                            statistics.averageRepetitions
-                          )}
-                        </strong>
-                      </div>
-                      <div>
-                        <span>Duración</span>
-                        <strong>
-                          {formatTime(maxExercise.durationSeconds)}
-                        </strong>
-                      </div>
-                      <div>
-                        <span>Intentos</span>
-                        <strong>{statistics.completedCount}</strong>
-                      </div>
+                    <div>
+                      <span>Media</span>
+                      <strong>
+                        {formatRepetitions(statistics.averageRepetitions)}
+                      </strong>
                     </div>
-
-                    <small>
-                      {statistics.lastCompletedAt
-                        ? `Última vez: ${formatDate(statistics.lastCompletedAt)}`
-                        : 'Todavía no has registrado este MAX'}
-                    </small>
+                    <div>
+                      <span>Duración</span>
+                      <strong>{formatTime(maxExercise.durationSeconds)}</strong>
+                    </div>
+                    <div>
+                      <span>Intentos</span>
+                      <strong>{statistics.completedCount}</strong>
+                    </div>
                   </div>
-                </article>
-              )
-            )}
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -398,12 +470,11 @@ function RecordsPage() {
                   <article
                     key={`${result.resultType}-${result.id}`}
                     className="records-history-item"
+                    {...getLongPressProps(result)}
                   >
                     <div>
                       <strong>
-                        {isMax
-                          ? result.maxName
-                          : result.workoutName}
+                        {isMax ? result.maxName : result.workoutName}
                       </strong>
                       <span>
                         {result.source === 'program'
@@ -437,6 +508,47 @@ function RecordsPage() {
       </section>
 
       <BottomNavigation activeItem="records" />
+
+      {pendingDelete && (
+        <div className="records-delete-overlay" role="presentation">
+          <section
+            className="records-delete-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-record-title"
+          >
+            <span className="records-delete-kicker">ELIMINAR REGISTRO</span>
+            <h2 id="delete-record-title">¿Estás seguro?</h2>
+            <p>
+              Se eliminará solamente este resultado. Las marcas se
+              recalcularán automáticamente.
+            </p>
+
+            <div className="records-delete-result">
+              <strong>{getDeleteTitle()}</strong>
+              <span>{getDeleteValue()}</span>
+              <small>{formatDate(pendingDelete.completedAt)}</small>
+            </div>
+
+            <div className="records-delete-actions">
+              <button
+                type="button"
+                className="records-delete-cancel"
+                onClick={() => setPendingDelete(null)}
+              >
+                CANCELAR
+              </button>
+              <button
+                type="button"
+                className="records-delete-confirm"
+                onClick={confirmDelete}
+              >
+                ELIMINAR
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   )
 }

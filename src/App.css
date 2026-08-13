@@ -2955,3 +2955,217 @@ img {
     height: 170px;
   }
 }
+/* =========================================================
+   PODIOS Y ELIMINACION INDIVIDUAL DE MARCAS
+   Anadir al final de src/App.css
+   ========================================================= */
+
+.records-long-press-help {
+  margin: -7px 0 0;
+  color: #747b87;
+  font-size: 0.67rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.records-podium-list {
+  display: grid;
+  gap: 7px;
+}
+
+.records-podium-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 45px;
+  padding: 7px 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: rgba(5, 7, 11, 0.28);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.records-podium-item:active {
+  border-color: rgba(85, 123, 232, 0.5);
+  background: rgba(23, 70, 199, 0.14);
+}
+
+.records-position {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #a3a8b2;
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.records-position-1 {
+  border: 1px solid rgba(91, 128, 226, 0.52);
+  background: rgba(23, 70, 199, 0.25);
+  color: #b5c6fb;
+}
+
+.records-position-2 {
+  color: #d2d5dc;
+}
+
+.records-position-3 {
+  color: #bca98d;
+}
+
+.records-podium-item > strong {
+  color: #eef0f5;
+  font-size: 0.84rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.records-podium-item > small {
+  color: #717783;
+  font-size: 0.59rem;
+  white-space: nowrap;
+}
+
+.records-no-podium {
+  padding: 14px 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #747b86;
+  font-size: 0.67rem;
+  text-align: center;
+}
+
+.records-history-item {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.records-history-item:active {
+  border-color: rgba(85, 123, 232, 0.45);
+  background: rgba(30, 55, 112, 0.22);
+}
+
+.records-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgba(4, 5, 8, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.records-delete-dialog {
+  display: grid;
+  width: min(100%, 410px);
+  gap: 14px;
+  padding: 23px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 19px;
+  background: #22252b;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.records-delete-kicker {
+  color: #d98b8b;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+}
+
+.records-delete-dialog h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 950;
+}
+
+.records-delete-dialog > p {
+  margin: 0;
+  color: #979ca6;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.records-delete-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 12px;
+  padding: 13px;
+  border: 1px solid rgba(193, 91, 91, 0.22);
+  border-radius: 12px;
+  background: rgba(105, 36, 36, 0.12);
+}
+
+.records-delete-result strong {
+  overflow: hidden;
+  color: #f0f1f4;
+  font-size: 0.82rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records-delete-result span {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.records-delete-result small {
+  grid-column: 1 / -1;
+  color: #777d87;
+  font-size: 0.62rem;
+}
+
+.records-delete-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.records-delete-cancel,
+.records-delete-confirm {
+  min-height: 48px;
+  border-radius: 11px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.records-delete-cancel {
+  border: 1px solid var(--app-border-strong);
+  background: rgba(255, 255, 255, 0.045);
+  color: #c2c6ce;
+}
+
+.records-delete-confirm {
+  border: 1px solid rgba(210, 103, 103, 0.38);
+  background: rgba(151, 47, 47, 0.24);
+  color: #efaaaa;
+}
+
+@media (max-width: 480px) {
+  .records-podium-item {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .records-podium-item > small {
+    font-size: 0.55rem;
+  }
+}

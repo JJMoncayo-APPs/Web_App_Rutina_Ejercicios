@@ -12,16 +12,15 @@ import {
   playStartBeep,
   unlockAudio,
 } from '../services/audioService'
-
-const PREPARATION_SECONDS = 5
+import { getAppSettings } from '../services/appSettingsService'
 
 const WORKOUT_IMAGES = {
-  aphrodite: 'assets/workouts/aphrodite.webp',
-  apollon: 'assets/workouts/apollon.webp',
-  dione: 'assets/workouts/dione.webp',
-  iris: 'assets/workouts/iris.webp',
-  metis: 'assets/workouts/metis.webp',
-  venus: 'assets/workouts/venus.webp',
+  aphrodite: '/assets/workouts/aphrodite.webp',
+  apollon: '/assets/workouts/apollon.webp',
+  dione: '/assets/workouts/dione.webp',
+  iris: '/assets/workouts/iris.webp',
+  metis: '/assets/workouts/metis.webp',
+  venus: '/assets/workouts/venus.webp',
 }
 
 const formatTime = (totalSeconds = 0) => {
@@ -156,6 +155,9 @@ function StandaloneWorkoutPage() {
   const navigate = useNavigate()
   const { workoutId = '' } = useParams()
 
+  const [appSettings] = useState(() => getAppSettings())
+  const preparationDuration = appSettings.preparationSeconds
+
   const workout = workouts[workoutId] || null
   const steps = useMemo(() => buildWorkoutSteps(workout), [workout])
   const statistics = useMemo(
@@ -166,7 +168,7 @@ function StandaloneWorkoutPage() {
   const [screen, setScreen] = useState('intro')
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [preparationSeconds, setPreparationSeconds] = useState(
-    PREPARATION_SECONDS
+    preparationDuration
   )
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
@@ -213,7 +215,13 @@ function StandaloneWorkoutPage() {
       lastSoundRef.current !== 2
     ) {
       lastSoundRef.current = 2
-      playPreparationBeep()
+      if (appSettings.soundsEnabled) {
+        playPreparationBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(80)
+      }
     }
 
     if (
@@ -221,7 +229,13 @@ function StandaloneWorkoutPage() {
       lastSoundRef.current !== 1
     ) {
       lastSoundRef.current = 1
-      playPreparationBeep()
+      if (appSettings.soundsEnabled) {
+        playPreparationBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(80)
+      }
     }
 
     if (
@@ -229,7 +243,13 @@ function StandaloneWorkoutPage() {
       lastSoundRef.current !== 0
     ) {
       lastSoundRef.current = 0
-      playStartBeep()
+      if (appSettings.soundsEnabled) {
+        playStartBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate([120, 60, 120])
+      }
 
       preparationRef.current = window.setTimeout(() => {
         setScreen('exercise')
@@ -245,7 +265,12 @@ function StandaloneWorkoutPage() {
     }, 1000)
 
     return () => clearTimeout(preparationRef.current)
-  }, [screen, preparationSeconds])
+  }, [
+    screen,
+    preparationSeconds,
+    appSettings.soundsEnabled,
+    appSettings.vibrationEnabled,
+  ])
 
   useEffect(() => {
     return () => {
@@ -256,7 +281,7 @@ function StandaloneWorkoutPage() {
 
   const startPreparation = () => {
     lastSoundRef.current = null
-    setPreparationSeconds(PREPARATION_SECONDS)
+    setPreparationSeconds(preparationDuration)
     setScreen('preparation')
   }
 
@@ -326,7 +351,7 @@ function StandaloneWorkoutPage() {
 
     setScreen('intro')
     setCurrentStepIndex(0)
-    setPreparationSeconds(PREPARATION_SECONDS)
+    setPreparationSeconds(preparationDuration)
     setElapsedSeconds(0)
     setTimerRunning(false)
     setStartedAt(null)
@@ -548,7 +573,8 @@ function StandaloneWorkoutPage() {
           {instructions}
         </p>
 
-        {currentStep.shoulderWarning && (
+        {appSettings.physicalWarningsEnabled &&
+          currentStep.shoulderWarning && (
           <div className="training-warning">
             Este ejercicio puede cargar el hombro. Detén el ejercicio
             si provoca dolor.

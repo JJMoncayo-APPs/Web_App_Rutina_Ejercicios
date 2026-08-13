@@ -15,11 +15,11 @@ import {
   unlockAudio,
 } from '../services/audioService'
 import { registerMaxResult } from '../services/maxHistoryService'
+import { getAppSettings } from '../services/appSettingsService'
 
 const STORAGE_KEY = 'freeletics-current-session'
 const BEST_TIMES_KEY = 'freeletics-best-times'
 const PROGRAM_PROGRESS_KEY = 'freeletics-program-progress'
-const PREPARATION_SECONDS = 5
 
 const ACTIONABLE_TYPES = ['exercise', 'run', 'max', 'rest']
 
@@ -170,6 +170,9 @@ function ActivityPage() {
   const weekNumber = Number(params.week || 1)
   const sessionNumber = Number(params.session || 1)
 
+  const [appSettings] = useState(() => getAppSettings())
+  const preparationDuration = appSettings.preparationSeconds
+
   const [session, setSession] = useState(() => {
     return (
       loadSavedSession(weekNumber, sessionNumber) ||
@@ -178,7 +181,7 @@ function ActivityPage() {
   })
   const [screen, setScreen] = useState('intro')
   const [preparationSeconds, setPreparationSeconds] = useState(
-    PREPARATION_SECONDS
+    preparationDuration
   )
   const [sessionTimerRunning, setSessionTimerRunning] = useState(false)
   const [stepTimerRunning, setStepTimerRunning] = useState(false)
@@ -248,17 +251,35 @@ function ActivityPage() {
 
     if (preparationSeconds === 2 && lastPreparationSoundRef.current !== 2) {
       lastPreparationSoundRef.current = 2
-      playPreparationBeep()
+      if (appSettings.soundsEnabled) {
+        playPreparationBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(80)
+      }
     }
 
     if (preparationSeconds === 1 && lastPreparationSoundRef.current !== 1) {
       lastPreparationSoundRef.current = 1
-      playPreparationBeep()
+      if (appSettings.soundsEnabled) {
+        playPreparationBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(80)
+      }
     }
 
     if (preparationSeconds === 0 && lastPreparationSoundRef.current !== 0) {
       lastPreparationSoundRef.current = 0
-      playStartBeep()
+      if (appSettings.soundsEnabled) {
+        playStartBeep()
+      }
+
+      if (appSettings.vibrationEnabled && navigator.vibrate) {
+        navigator.vibrate([120, 60, 120])
+      }
 
       preparationTimeoutRef.current = window.setTimeout(() => {
         setScreen('exercise')
@@ -276,7 +297,13 @@ function ActivityPage() {
     }, 1000)
 
     return () => clearTimeout(preparationTimeoutRef.current)
-  }, [screen, preparationSeconds, currentStep?.type])
+  }, [
+    screen,
+    preparationSeconds,
+    currentStep?.type,
+    appSettings.soundsEnabled,
+    appSettings.vibrationEnabled,
+  ])
 
   useEffect(() => {
     clearInterval(stepIntervalRef.current)
@@ -333,7 +360,13 @@ function ActivityPage() {
     }
 
     setStepTimerRunning(false)
-    playFinishBeep()
+    if (appSettings.soundsEnabled) {
+      playFinishBeep()
+    }
+
+    if (appSettings.vibrationEnabled && navigator.vibrate) {
+      navigator.vibrate([180, 80, 180])
+    }
 
     if (currentStep.type === 'max') {
       return undefined
@@ -365,7 +398,7 @@ function ActivityPage() {
   const startPreparation = () => {
     lastPreparationSoundRef.current = null
     automaticAdvanceRef.current = false
-    setPreparationSeconds(PREPARATION_SECONDS)
+    setPreparationSeconds(preparationDuration)
     setScreen('preparation')
   }
 
@@ -514,7 +547,13 @@ function ActivityPage() {
       setSession(finishedSession)
       setSessionTimerRunning(false)
       setScreen('completed')
+      if (appSettings.soundsEnabled) {
       playFinishBeep()
+    }
+
+    if (appSettings.vibrationEnabled && navigator.vibrate) {
+      navigator.vibrate([180, 80, 180])
+    }
       return
     }
 
@@ -589,7 +628,7 @@ function ActivityPage() {
     setSession(newSession)
     setSessionTimerRunning(false)
     setStepTimerRunning(false)
-    setPreparationSeconds(PREPARATION_SECONDS)
+    setPreparationSeconds(preparationDuration)
     setShowExitDialog(false)
     setIsNewBestTime(false)
     setScreen('intro')
@@ -707,7 +746,7 @@ function ActivityPage() {
         </article>
         <article>
           <span>Preparación</span>
-          <strong>5 segundos</strong>
+          <strong>{preparationDuration} segundos</strong>
         </article>
       </div>
     </section>
@@ -844,7 +883,8 @@ function ActivityPage() {
           {selectedInstructions}
         </p>
 
-        {currentStep.shoulderWarning && (
+        {appSettings.physicalWarningsEnabled &&
+          currentStep.shoulderWarning && (
           <div className="training-warning">
             Este ejercicio puede cargar el hombro. Detén la sesión si
             provoca dolor.

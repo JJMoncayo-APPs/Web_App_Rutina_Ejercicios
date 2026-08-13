@@ -52,8 +52,8 @@ export const exercises = {
     shortName: 'Burpees',
     category: 'cardio',
     measurement: 'repetitions',
-    image: '/assets/exercises/burpees.webp',
-    modifiedImage: '/assets/exercises/burpees-modified.webp',
+    image: 'assets/exercises/burpees.webp',
+    modifiedImage: 'assets/exercises/burpees-modified.webp',
     instructions:
       'Desde posición de pie, baja al suelo, lleva los pies atrás, vuelve a levantarte y termina con un salto.',
     modifiedInstructions:
@@ -67,8 +67,8 @@ export const exercises = {
     shortName: 'Sentadillas',
     category: 'legs',
     measurement: 'repetitions',
-    image: '/assets/exercises/squats.webp',
-    modifiedImage: '/assets/exercises/squats-modified.webp',
+    image: 'assets/exercises/squats.webp',
+    modifiedImage: 'assets/exercises/squats-modified.webp',
     instructions:
       'Baja la cadera por debajo de la altura de las rodillas y vuelve a la posición de pie.',
     modifiedInstructions:
@@ -82,8 +82,8 @@ export const exercises = {
     shortName: 'Sentadillas profundas',
     category: 'legs',
     measurement: 'repetitions',
-    image: '/assets/exercises/deep-squats.webp',
-    modifiedImage: '/assets/exercises/deep-squats-modified.webp',
+    image: 'assets/exercises/deep-squats.webp',
+    modifiedImage: 'assets/exercises/deep-squats-modified.webp',
     instructions:
       'Baja la cadera de manera controlada hasta alcanzar la máxima profundidad posible y vuelve a levantarte.',
     modifiedInstructions:
@@ -97,8 +97,8 @@ export const exercises = {
     shortName: 'Abdominales',
     category: 'core',
     measurement: 'repetitions',
-    image: '/assets/exercises/situps.webp',
-    modifiedImage: '/assets/exercises/situps-modified.webp',
+    image: 'assets/exercises/situps.webp',
+    modifiedImage: 'assets/exercises/situps-modified.webp',
     instructions:
       'Desde una posición sentada, baja el tronco hasta el suelo y vuelve a incorporarte.',
     modifiedInstructions:
@@ -112,8 +112,8 @@ export const exercises = {
     shortName: 'Elevaciones de piernas',
     category: 'core',
     measurement: 'repetitions',
-    image: '/assets/exercises/leg-levers.webp',
-    modifiedImage: '/assets/exercises/leg-levers-modified.webp',
+    image: 'assets/exercises/leg-levers.webp',
+    modifiedImage: 'assets/exercises/leg-levers-modified.webp',
     instructions:
       'Tumbado boca arriba, eleva las piernas juntas hasta colocarlas verticales y bájalas de forma controlada.',
     modifiedInstructions:
@@ -127,7 +127,7 @@ export const exercises = {
     shortName: 'Jumping Jacks',
     category: 'cardio',
     measurement: 'repetitions',
-    image: '/assets/exercises/jumping-jacks.webp',
+    image: 'assets/exercises/jumping-jacks.webp',
     modifiedImage: null,
     instructions:
       'Abre las piernas mientras elevas los brazos y vuelve a la posición inicial.',
@@ -141,8 +141,8 @@ export const exercises = {
     shortName: 'Climbers',
     category: 'cardio',
     measurement: 'repetitions',
-    image: '/assets/exercises/climbers.webp',
-    modifiedImage: '/assets/exercises/climbers-modified.webp',
+    image: 'assets/exercises/climbers.webp',
+    modifiedImage: 'assets/exercises/climbers-modified.webp',
     instructions:
       'Desde la posición de plancha, lleva alternativamente cada pie hacia la altura de las manos.',
     modifiedInstructions:
@@ -156,8 +156,8 @@ export const exercises = {
     shortName: 'Saltos altos',
     category: 'cardio',
     measurement: 'repetitions',
-    image: '/assets/exercises/high-jumps.webp',
-    modifiedImage: '/assets/exercises/high-jumps-modified.webp',
+    image: 'assets/exercises/high-jumps.webp',
+    modifiedImage: 'assets/exercises/high-jumps-modified.webp',
     instructions:
       'Salta verticalmente elevando las rodillas y aterriza suavemente.',
     modifiedInstructions:
@@ -171,8 +171,8 @@ export const exercises = {
     shortName: 'Flexiones',
     category: 'upperBody',
     measurement: 'repetitions',
-    image: '/assets/exercises/pushups.webp',
-    modifiedImage: '/assets/exercises/pushups-modified.webp',
+    image: 'assets/exercises/pushups.webp',
+    modifiedImage: 'assets/exercises/pushups-modified.webp',
     instructions:
       'Mantén el cuerpo alineado, extiende completamente los brazos y vuelve a bajar de forma controlada.',
     modifiedInstructions:
@@ -186,8 +186,8 @@ export const exercises = {
     shortName: 'Jackknives',
     category: 'core',
     measurement: 'repetitions',
-    image: '/assets/exercises/jackknives.webp',
-    modifiedImage: '/assets/exercises/jackknives-modified.webp',
+    image: 'assets/exercises/jackknives.webp',
+    modifiedImage: 'assets/exercises/jackknives-modified.webp',
     instructions:
       'Eleva simultáneamente las piernas y el tronco hasta acercar las manos a los pies.',
     modifiedInstructions:
@@ -201,8 +201,8 @@ export const exercises = {
     shortName: 'Carrera',
     category: 'cardio',
     measurement: 'distance',
-    image: '/assets/exercises/running.webp',
-    modifiedImage: '/assets/exercises/running-modified.webp',
+    image: 'assets/exercises/running.webp',
+    modifiedImage: 'assets/exercises/running-modified.webp',
     instructions:
       'Completa la distancia indicada a un ritmo que puedas mantener con seguridad.',
     modifiedInstructions:

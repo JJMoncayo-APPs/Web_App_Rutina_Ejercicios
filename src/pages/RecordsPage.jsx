@@ -33,20 +33,20 @@ const MAX_ORDER = [
 ]
 
 const WORKOUT_IMAGES = {
-  aphrodite: '/assets/workouts/aphrodite.webp',
-  apollon: '/assets/workouts/apollon.webp',
-  dione: '/assets/workouts/dione.webp',
-  iris: '/assets/workouts/iris.webp',
-  metis: '/assets/workouts/metis.webp',
-  venus: '/assets/workouts/venus.webp',
+  aphrodite: 'assets/workouts/aphrodite.webp',
+  apollon: 'assets/workouts/apollon.webp',
+  dione: 'assets/workouts/dione.webp',
+  iris: 'assets/workouts/iris.webp',
+  metis: 'assets/workouts/metis.webp',
+  venus: 'assets/workouts/venus.webp',
 }
 
 const MAX_IMAGES = {
-  burpeeMax: '/assets/exercises/burpees.webp',
-  squatMax: '/assets/exercises/squats.webp',
-  situpMax: '/assets/exercises/situps.webp',
-  pushupMax: '/assets/exercises/pushups.webp',
-  legLeverMax: '/assets/exercises/leg-levers.webp',
+  burpeeMax: 'assets/exercises/burpees.webp',
+  squatMax: 'assets/exercises/squats.webp',
+  situpMax: 'assets/exercises/situps.webp',
+  pushupMax: 'assets/exercises/pushups.webp',
+  legLeverMax: 'assets/exercises/leg-levers.webp',
 }
 
 const formatTime = (totalSeconds) => {

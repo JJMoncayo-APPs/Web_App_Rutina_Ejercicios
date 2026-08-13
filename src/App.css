@@ -3576,7 +3576,10 @@ img {
   flex: 0 0 58px;
   border: 1px solid rgba(85, 123, 232, 0.35);
   border-radius: 50%;
-  object-fit: cover;
+  background-color: #15171c;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.35),
     0 0 20px rgba(23, 70, 199, 0.2);

@@ -40,13 +40,20 @@ function WelcomePage() {
       <section className="welcome-card">
         <header className="welcome-header">
           <div className="welcome-logo">
-            assets/branding/free-athlete-logo.png
+  <div
+    className="welcome-logo-image"
+    role="img"
+    aria-label="Logo de Free Athlete"
+    style={{
+      backgroundImage: `url("${import.meta.env.BASE_URL}assets/branding/free-athlete-logo.png")`,
+    }}
+  />
 
-            <div className="welcome-logo-text">
-              <strong>FREE ATHLETE</strong>
-              <span>PERSONAL TRAINING</span>
-            </div>
-          </div>
+  <div className="welcome-logo-text">
+    <strong>FREE ATHLETE</strong>
+    <span>PERSONAL TRAINING</span>
+  </div>
+</div>
 
           <div className="welcome-program-status">
             <span />

@@ -3169,3 +3169,388 @@ img {
     font-size: 0.55rem;
   }
 }
+/* =========================================================
+   PAGINA DE AJUSTES
+   Anadir al final de src/App.css
+   ========================================================= */
+
+.settings-page {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 92px;
+  background: radial-gradient(circle at 85% 0%, rgba(23, 70, 199, 0.18), transparent 30%), linear-gradient(160deg, #101217 0%, #17191f 48%, #0d0f13 100%);
+  color: var(--app-text);
+  isolation: isolate;
+}
+
+.settings-mineral-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.55;
+  background: radial-gradient(ellipse at 15% 20%, rgba(255, 255, 255, 0.035), transparent 32%), radial-gradient(ellipse at 85% 65%, rgba(45, 88, 190, 0.08), transparent 35%), repeating-linear-gradient(128deg, transparent 0, transparent 18px, rgba(255, 255, 255, 0.009) 19px, transparent 20px);
+  pointer-events: none;
+}
+
+.settings-shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 24px 18px 38px;
+  gap: 20px;
+  align-content: start;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.settings-header > div:first-child,
+.settings-section-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-header-label,
+.settings-section-heading span {
+  color: var(--app-blue-bright);
+  font-size: 0.65rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.settings-header h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.3rem, 9vw, 3.4rem);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.settings-header p {
+  max-width: 500px;
+  margin: 4px 0 0;
+  color: var(--app-muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.settings-header-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid rgba(85, 123, 232, 0.28);
+  border-radius: 14px;
+  background: rgba(23, 70, 199, 0.15);
+  color: #7799f4;
+}
+
+.settings-header-icon svg,
+.settings-row-icon svg,
+.settings-danger-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.settings-message {
+  padding: 11px 14px;
+  border: 1px solid rgba(85, 123, 232, 0.28);
+  border-radius: 12px;
+  background: rgba(23, 70, 199, 0.14);
+  color: #aebff0;
+  font-size: 0.73rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.settings-section {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-section-heading h2 {
+  margin: 0;
+  color: #f2f4f8;
+  font-size: 1.35rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+
+.settings-card,
+.settings-danger-card {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 17px;
+  background: rgba(31, 34, 40, 0.92);
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 13px 14px;
+}
+
+.settings-row + .settings-row,
+.settings-danger-row + .settings-danger-row {
+  border-top: 1px solid var(--app-border);
+}
+
+.settings-row-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(23, 70, 199, 0.15);
+  color: #7596ed;
+}
+
+.settings-row-content {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.settings-row-content strong {
+  color: #edf0f5;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.settings-row-content span {
+  color: #7f8590;
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.settings-toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: #30343b;
+  cursor: pointer;
+}
+
+.settings-toggle span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #a0a5ae;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.settings-toggle-active {
+  border-color: rgba(85, 123, 232, 0.5);
+  background: rgba(23, 70, 199, 0.55);
+}
+
+.settings-toggle-active span {
+  background: #ffffff;
+  transform: translateX(20px);
+}
+
+.settings-row-stacked {
+  grid-template-columns: 42px minmax(0, 1fr);
+}
+
+.settings-segmented-control {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 5px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.settings-segment {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #858b96;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.settings-segment-active {
+  border-color: rgba(85, 123, 232, 0.4);
+  background: rgba(23, 70, 199, 0.24);
+  color: #b2c3f5;
+}
+
+.settings-danger-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 13px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-danger-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(139, 48, 48, 0.17);
+  color: #dc8e8e;
+}
+
+.settings-danger-row > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-danger-row strong {
+  color: #e8b0b0;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.settings-danger-row small {
+  color: #7f858f;
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.settings-footer {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 0 2px;
+  color: #686e78;
+  font-size: 0.64rem;
+}
+
+.settings-footer strong {
+  color: #858b96;
+  font-size: 0.72rem;
+}
+
+.settings-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgba(4, 5, 8, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.settings-dialog {
+  display: grid;
+  width: min(100%, 410px);
+  gap: 14px;
+  padding: 23px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 19px;
+  background: #22252b;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.settings-dialog > span {
+  color: #d98b8b;
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+}
+
+.settings-dialog h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 950;
+}
+
+.settings-dialog p {
+  margin: 0;
+  color: #979ca6;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.settings-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.settings-dialog-actions button {
+  min-height: 48px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #c2c6ce;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.settings-dialog-actions .settings-dialog-confirm {
+  border-color: rgba(210, 103, 103, 0.38);
+  background: rgba(151, 47, 47, 0.24);
+  color: #efaaaa;
+}
+
+@media (min-width: 760px) {
+  .settings-page {
+    padding: 28px 28px 105px;
+  }
+
+  .settings-shell {
+    min-height: auto;
+    padding: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 26px;
+    background: rgba(16, 18, 23, 0.78);
+    box-shadow: 0 35px 100px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(16px);
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-shell {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .settings-header-icon {
+    width: 43px;
+    height: 43px;
+    flex-basis: 43px;
+  }
+}

@@ -12,6 +12,7 @@ import WorkoutsPage from './pages/WorkoutsPage'
 import RecordsPage from './pages/RecordsPage'
 import ActivityPage from './pages/ActivityPage'
 import StandaloneWorkoutPage from './pages/StandaloneWorkoutPage'
+import SettingsPage from './pages/SettingsPage'
 import './App.css'
 
 const PROGRAM_STARTED_KEY = 'freeletics-program-started'
@@ -58,10 +59,7 @@ function App() {
           element={<ActivityPage />}
         />
 
-        <Route
-          path="/ajustes"
-          element={<Navigate to="/programa" replace />}
-        />
+        <Route path="/ajustes" element={<SettingsPage />} />
 
         <Route
           path="/actividad"

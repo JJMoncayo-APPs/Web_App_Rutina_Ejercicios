@@ -16,12 +16,12 @@ import {
 const PREPARATION_SECONDS = 5
 
 const WORKOUT_IMAGES = {
-  aphrodite: '/assets/workouts/aphrodite.webp',
-  apollon: '/assets/workouts/apollon.webp',
-  dione: '/assets/workouts/dione.webp',
-  iris: '/assets/workouts/iris.webp',
-  metis: '/assets/workouts/metis.webp',
-  venus: '/assets/workouts/venus.webp',
+  aphrodite: 'assets/workouts/aphrodite.webp',
+  apollon: 'assets/workouts/apollon.webp',
+  dione: 'assets/workouts/dione.webp',
+  iris: 'assets/workouts/iris.webp',
+  metis: 'assets/workouts/metis.webp',
+  venus: 'assets/workouts/venus.webp',
 }
 
 const formatTime = (totalSeconds = 0) => {

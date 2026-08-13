@@ -1,7 +1,7 @@
 // src/App.jsx
 
 import {
-  BrowserRouter,
+  HashRouter,
   Navigate,
   Route,
   Routes,
@@ -29,7 +29,7 @@ function InitialRoute() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<InitialRoute />} />
 
@@ -73,7 +73,7 @@ function App() {
           element={<Navigate to="/programa" replace />}
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

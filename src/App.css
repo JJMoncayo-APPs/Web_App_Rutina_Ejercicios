@@ -3555,13 +3555,16 @@ img {
   }
 }
 .settings-footer-logo {
-  display: block;
   width: 82px;
   height: 82px;
   margin-bottom: 5px;
   border: 1px solid rgba(85, 123, 232, 0.32);
   border-radius: 50%;
-  object-fit: cover;
+  background-color: #15171c;
+  background-image: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.32),
     0 0 22px rgba(23, 70, 199, 0.16);

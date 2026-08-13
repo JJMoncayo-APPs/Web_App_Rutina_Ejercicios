@@ -235,11 +235,19 @@ function SettingsPage() {
         </section>
 
         <footer className="settings-footer">
-          assets/branding/free-athlete-logo.png
+        <div
+          className="settings-footer-logo"
+          role="img"
+          aria-label="Logo de Free Athlete"
+          style={{
+            backgroundImage:
+              'url("assets/branding/free-athlete-logo.png")',
+          }}
+        />
 
-          <strong>Free Athlete</strong>
-          <span>Versión 1.0.0</span>
-        </footer>
+        <strong>Free Athlete</strong>
+        <span>Versión 1.0.0</span>
+      </footer>
       </section>
 
       <BottomNavigation activeItem="settings" />

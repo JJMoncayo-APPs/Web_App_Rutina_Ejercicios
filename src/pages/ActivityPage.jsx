@@ -15,6 +15,7 @@ import {
   unlockAudio,
 } from '../services/audioService'
 import { registerMaxResult } from '../services/maxHistoryService'
+import { registerWorkoutResult } from '../services/workoutHistoryService'
 import { getAppSettings } from '../services/appSettingsService'
 
 const STORAGE_KEY = 'freeletics-current-session'
@@ -109,32 +110,6 @@ const loadBestTime = (workoutName) => {
   } catch (error) {
     console.error('No se pudo cargar el mejor tiempo:', error)
     return null
-  }
-}
-
-const saveBestTime = (workoutName, elapsedSeconds) => {
-  if (!workoutName || Number(elapsedSeconds) <= 0) {
-    return false
-  }
-
-  try {
-    const storedTimes = JSON.parse(
-      localStorage.getItem(BEST_TIMES_KEY) || '{}'
-    )
-    const workoutId = workoutName.toLowerCase()
-    const previousBest = Number(storedTimes[workoutId])
-    const newTime = Number(elapsedSeconds)
-
-    if (!previousBest || newTime < previousBest) {
-      storedTimes[workoutId] = newTime
-      localStorage.setItem(BEST_TIMES_KEY, JSON.stringify(storedTimes))
-      return true
-    }
-
-    return false
-  } catch (error) {
-    console.error('No se pudo guardar el mejor tiempo:', error)
-    return false
   }
 }
 
@@ -282,6 +257,7 @@ function ActivityPage() {
       }
 
       preparationTimeoutRef.current = window.setTimeout(() => {
+        startWorkoutTracking()
         setScreen('exercise')
 
         if (currentStep?.type === 'max') {
@@ -395,6 +371,43 @@ function ActivityPage() {
     }
   }, [])
 
+  const startWorkoutTracking = () => {
+    setSession((currentSession) => {
+      if (!currentSession?.steps?.length) {
+        return currentSession
+      }
+
+      const activeStep =
+        currentSession.steps[currentSession.currentStepIndex]
+      const occurrenceId = activeStep?.workoutOccurrenceId
+
+      if (!occurrenceId) {
+        return currentSession
+      }
+
+      const currentTracking = currentSession.workoutTracking || {}
+
+      if (currentTracking[occurrenceId]) {
+        return currentSession
+      }
+
+      return {
+        ...currentSession,
+        workoutTracking: {
+          ...currentTracking,
+          [occurrenceId]: {
+            workoutId: activeStep.workoutId,
+            workoutName: activeStep.workoutName,
+            startedAt: new Date().toISOString(),
+            startedAtSessionSeconds: Number(
+              currentSession.elapsedSeconds || 0
+            ),
+          },
+        },
+      }
+    })
+  }
+
   const startPreparation = () => {
     lastPreparationSoundRef.current = null
     automaticAdvanceRef.current = false
@@ -480,6 +493,56 @@ function ActivityPage() {
     const activeStep = sourceSession.steps[sourceSession.currentStepIndex]
 
     if (
+      activeStep?.workoutLastStep === true &&
+      activeStep.workoutResultRegistered !== true
+    ) {
+      const occurrenceId = activeStep.workoutOccurrenceId
+      const tracking = sourceSession.workoutTracking?.[occurrenceId]
+      const startedAtSessionSeconds = Number(
+        tracking?.startedAtSessionSeconds || 0
+      )
+      const elapsedSeconds = Math.max(
+        1,
+        Number(sourceSession.elapsedSeconds || 0) -
+          startedAtSessionSeconds
+      )
+      const workoutResult = registerWorkoutResult({
+        workoutId: activeStep.workoutId,
+        workoutName: activeStep.workoutName,
+        source: 'program',
+        weekNumber: sourceSession.weekNumber,
+        sessionNumber: sourceSession.sessionNumber,
+        startedAt: tracking?.startedAt || null,
+        completedAt: new Date().toISOString(),
+        elapsedSeconds,
+        completedWithModifiedExercises: sourceSession.steps.some(
+          (step) =>
+            step.workoutOccurrenceId === occurrenceId &&
+            step.selectedVersion === 'modified'
+        ),
+      })
+
+      if (!workoutResult) {
+        return
+      }
+
+      sourceSession = updateSessionStep(
+        sourceSession,
+        sourceSession.currentStepIndex,
+        {
+          workoutResultRegistered: true,
+          workoutResultId: workoutResult.id,
+          workoutElapsedSeconds: elapsedSeconds,
+          workoutIsPersonalBest: workoutResult.isPersonalBest,
+        }
+      )
+
+      if (workoutResult.isPersonalBest) {
+        setIsNewBestTime(true)
+      }
+    }
+
+    if (
       activeStep?.type === 'max' &&
       activeStep.maxResultRegistered !== true
     ) {
@@ -527,11 +590,6 @@ function ActivityPage() {
     )
 
     if (nextStepIndex < 0) {
-      const achievedNewBest = saveBestTime(
-        completedSession.name,
-        completedSession.elapsedSeconds
-      )
-
       saveCompletedSession(
         completedSession.weekNumber,
         completedSession.sessionNumber
@@ -543,7 +601,6 @@ function ActivityPage() {
         completedAt: new Date().toISOString(),
       }
 
-      setIsNewBestTime(achievedNewBest)
       setSession(finishedSession)
       setSessionTimerRunning(false)
       setScreen('completed')
@@ -941,8 +998,9 @@ function ActivityPage() {
         {formatTime(currentStep?.remainingSeconds)}
       </div>
       <p>
-        Recupera el ritmo respiratorio. Al terminar aparecerán los 5
-        segundos de preparación del siguiente ejercicio.
+        Recupera el ritmo respiratorio. Al terminar aparecerán los{' '}
+        {preparationDuration} segundos de preparación del siguiente
+        ejercicio.
       </p>
       <button
         type="button"

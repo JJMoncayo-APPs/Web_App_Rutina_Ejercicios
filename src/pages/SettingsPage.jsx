@@ -235,7 +235,9 @@ function SettingsPage() {
         </section>
 
         <footer className="settings-footer">
-          <strong>FitHome IA</strong>
+          assets/branding/free-athlete-logo.png
+
+          <strong>Free Athlete</strong>
           <span>Versión 1.0.0</span>
         </footer>
       </section>

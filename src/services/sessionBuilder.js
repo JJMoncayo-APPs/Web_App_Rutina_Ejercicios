@@ -28,12 +28,7 @@ const buildExerciseStep = ({
   }
 
   return {
-    id: createId(
-      workout.id,
-      roundNumber || 0,
-      exercise.id,
-      position
-    ),
+    id: createId(workout.id, roundNumber || 0, exercise.id, position),
     type: 'exercise',
     workoutId: workout.id,
     workoutName: workout.name,
@@ -72,12 +67,7 @@ const buildRunStep = ({
   }
 
   return {
-    id: createId(
-      workout.id,
-      roundNumber || 0,
-      'running',
-      position
-    ),
+    id: createId(workout.id, roundNumber || 0, 'running', position),
     type: 'run',
     workoutId: workout.id,
     workoutName: workout.name,
@@ -141,27 +131,32 @@ const buildWorkoutSteps = (workoutId, occurrence = 1) => {
 
   const result = []
   const totalRounds = workout.rounds?.length || 0
+  const workoutOccurrenceId = createId(workout.id, occurrence)
+
+  const addBuiltStep = (stepData) => {
+    const builtStep = buildWorkoutContentStep(stepData)
+
+    if (builtStep) {
+      result.push(builtStep)
+    }
+  }
 
   if (Array.isArray(workout.initialSteps)) {
     workout.initialSteps.forEach((step, index) => {
-      const builtStep = buildWorkoutContentStep({
+      addBuiltStep({
         step,
         workout,
         roundNumber: null,
         totalRounds,
         position: createId(occurrence, 'initial', index + 1),
       })
-
-      if (builtStep) {
-        result.push(builtStep)
-      }
     })
   }
 
   if (Array.isArray(workout.rounds)) {
     workout.rounds.forEach((round) => {
       round.steps.forEach((step, index) => {
-        const builtStep = buildWorkoutContentStep({
+        addBuiltStep({
           step,
           workout,
           roundNumber: round.round,
@@ -173,31 +168,30 @@ const buildWorkoutSteps = (workoutId, occurrence = 1) => {
             index + 1
           ),
         })
-
-        if (builtStep) {
-          result.push(builtStep)
-        }
       })
     })
   }
 
   if (Array.isArray(workout.finalSteps)) {
     workout.finalSteps.forEach((step, index) => {
-      const builtStep = buildWorkoutContentStep({
+      addBuiltStep({
         step,
         workout,
         roundNumber: null,
         totalRounds,
         position: createId(occurrence, 'final', index + 1),
       })
-
-      if (builtStep) {
-        result.push(builtStep)
-      }
     })
   }
 
-  return result
+  return result.map((step, index) => ({
+    ...step,
+    workoutOccurrenceId,
+    workoutOccurrence: occurrence,
+    workoutFirstStep: index === 0,
+    workoutLastStep: index === result.length - 1,
+    workoutResultRegistered: false,
+  }))
 }
 
 const buildMaxStep = (maxId, occurrence = 1) => {
@@ -211,9 +205,7 @@ const buildMaxStep = (maxId, occurrence = 1) => {
   const exercise = getExercise(maxExercise.exerciseId)
 
   if (!exercise) {
-    console.warn(
-      `Ejercicio no encontrado para ${maxExercise.name}`
-    )
+    console.warn(`Ejercicio no encontrado para ${maxExercise.name}`)
     return null
   }
 
@@ -264,14 +256,12 @@ export const buildSession = (weekNumber, sessionNumber) => {
     console.warn(
       `Sesión no encontrada: semana ${weekNumber}, sesión ${sessionNumber}`
     )
-
     return null
   }
 
   const workoutOccurrences = {}
   const maxOccurrences = {}
   let restOccurrence = 0
-
   const steps = []
 
   sessionData.steps.forEach((step) => {
@@ -279,12 +269,12 @@ export const buildSession = (weekNumber, sessionNumber) => {
       workoutOccurrences[step.workoutId] =
         (workoutOccurrences[step.workoutId] || 0) + 1
 
-      const workoutSteps = buildWorkoutSteps(
-        step.workoutId,
-        workoutOccurrences[step.workoutId]
+      steps.push(
+        ...buildWorkoutSteps(
+          step.workoutId,
+          workoutOccurrences[step.workoutId]
+        )
       )
-
-      steps.push(...workoutSteps)
       return
     }
 
@@ -300,16 +290,12 @@ export const buildSession = (weekNumber, sessionNumber) => {
       if (maxStep) {
         steps.push(maxStep)
       }
-
       return
     }
 
     if (step.type === 'rest') {
       restOccurrence += 1
-
-      steps.push(
-        buildRestStep(step.durationSeconds, restOccurrence)
-      )
+      steps.push(buildRestStep(step.durationSeconds, restOccurrence))
     }
   })
 
@@ -327,16 +313,13 @@ export const buildSession = (weekNumber, sessionNumber) => {
     startedAt: null,
     completedAt: null,
     elapsedSeconds: 0,
+    workoutTracking: {},
     steps,
     totalSteps: steps.length,
   }
 }
 
-export const updateSessionStep = (
-  session,
-  stepIndex,
-  changes
-) => {
+export const updateSessionStep = (session, stepIndex, changes) => {
   if (!session || !Array.isArray(session.steps)) {
     return session
   }
@@ -353,16 +336,9 @@ export const updateSessionStep = (
 
   return {
     ...session,
-    steps: session.steps.map((step, index) => {
-      if (index !== parsedIndex) {
-        return step
-      }
-
-      return {
-        ...step,
-        ...changes,
-      }
-    }),
+    steps: session.steps.map((step, index) =>
+      index === parsedIndex ? { ...step, ...changes } : step
+    ),
   }
 }
 
@@ -371,10 +347,7 @@ export const setMaxRepetitions = (
   stepIndex,
   repetitions
 ) => {
-  const numericRepetitions = Math.max(
-    0,
-    Number(repetitions) || 0
-  )
+  const numericRepetitions = Math.max(0, Number(repetitions) || 0)
 
   return updateSessionStep(session, stepIndex, {
     repetitionsCompleted: numericRepetitions,
@@ -393,13 +366,10 @@ export const getSessionProgress = (session) => {
   const relevantSteps = session.steps.filter((step) =>
     ['exercise', 'run', 'max', 'rest'].includes(step.type)
   )
-
   const completedSteps = relevantSteps.filter(
     (step) => step.completed === true
   ).length
-
   const totalSteps = relevantSteps.length
-
   const percentage =
     totalSteps === 0
       ? 0

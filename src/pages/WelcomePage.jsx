@@ -40,11 +40,11 @@ function WelcomePage() {
       <section className="welcome-card">
         <header className="welcome-header">
           <div className="welcome-logo">
-            <span className="welcome-logo-mark">15</span>
+            assets/branding/free-athlete-logo.png
 
             <div className="welcome-logo-text">
-              <strong>WEEKS</strong>
-              <span>TRAINING</span>
+              <strong>FREE ATHLETE</strong>
+              <span>PERSONAL TRAINING</span>
             </div>
           </div>
 
